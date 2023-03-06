@@ -27,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent) :
   //根据连接状态请求相应靶标接口
   connect(mySocket,SIGNAL(mySignalState(QVector<int>)),this,SLOT(passStateData(QVector<int>)));
 
-
+  //获取电量
   connect(mySocket,SIGNAL(mySignalBattery(QVector<double>)),myListWidget,SLOT(passBatteryData(QVector<double>)));
 
 

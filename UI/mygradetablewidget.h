@@ -23,6 +23,8 @@
 #include<QDir>
 #include<sqlitetools.h>
 
+#include <algorithm>
+
 class MyGradeTableWidget : public QWidget
 {
   Q_OBJECT
@@ -38,6 +40,8 @@ public:
   void create();
 
   void initTableWidget();
+//  void checkGrade(QVector<int> numVec,QVector<QString> nameVec,int baHao,int fenZu);
+
 public slots:
   //    void updateGrade(QList<QList<int>> msg);
 
@@ -51,6 +55,8 @@ signals:
 
 private slots:
   void check_clicked();
+
+  void updateGrade(QList<QList<QString>> msg);
 
 
   void dateChange(const QDate &date);
@@ -69,8 +75,8 @@ private:
 
   QXlsx::Document xlsx;
 
-  int baHao = 0;
-  int fenZu = 0;
+  int baHao = -1;
+  int fenZu = -1;
 
   QTableWidgetItem *baWei = NULL;
 

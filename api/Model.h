@@ -49,7 +49,7 @@ const int UserGrouping = 10006;
 
 
 // 获取信息接口路由值 20000-29999
-// GetTargetInfo 获取打靶信息(暂时无用)
+// GetTargetInfo 获取
 const int    GetTargetInfo = 20000;
 // GetTargetState 获取靶标状态
 const int    GetTargetState = 20001;
@@ -57,6 +57,8 @@ const int    GetTargetState = 20001;
 const int    GetShowInfo = 20002;
 // GetVoltage 获取电压
 const int    GetVoltage = 20003;
+
+
 
 
 
@@ -116,12 +118,16 @@ inline QVariantList toJsonData(QString strm,int code,int addr,bool flag)
 
   var.insert("msg", var1);
   QVariantMap var2;
+
+  //  var2.insert("group_number",-1);
+
   if(flag == true)
     {
       var2.insert(strm,addr);
     }
 
   var.insert("data", var2);
+
 
   varList << var;
   return varList;

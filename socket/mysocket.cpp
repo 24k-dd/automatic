@@ -3,7 +3,8 @@
 MySocket::MySocket(QObject *parent)
   : QTcpSocket(parent)
 {
-  QString Ip = "127.0.0.1";
+    QString Ip = "127.0.0.1";
+//  QString Ip = "192.168.43.191";
   int Port = 32728;
 
   //去掉代理
@@ -21,19 +22,19 @@ MySocket::MySocket(QObject *parent)
   connect(this, &QTcpSocket::readyRead,this,&MySocket::recvData);
 }
 
-void MySocket::tryConnect()
-{
-//  abort();
-//  connectToHost(QHostAddress(Ip),Port);
-//  if(waitForConnected())
-//    {
-//      qDebug() << "connect success";
-//      return true;
-//    }else{
-//      qDebug() << "connect failed";
-//      return false;
-//    }
-}
+//void MySocket::tryConnect()
+//{
+//  //  abort();
+//  //  connectToHost(QHostAddress(Ip),Port);
+//  //  if(waitForConnected())
+//  //    {
+//  //      qDebug() << "connect success";
+//  //      return true;
+//  //    }else{
+//  //      qDebug() << "connect failed";
+//  //      return false;
+//  //    }
+//}
 
 void MySocket::sendData(QString msg)
 {
@@ -46,7 +47,7 @@ void MySocket::recvData()
   QByteArray recvMsg = readAll();
 
   QString recvStr = QString::fromUtf8(recvMsg);
-//  qDebug()<<"recv:"<<recvStr;
+  qDebug()<<"recv:"<<recvStr;
 
 
   //构建JSON对象
@@ -59,15 +60,16 @@ void MySocket::recvData()
 
 
 
-  if(code == GetTargetState){
-    QMap<QString, QVariant> map1 = map["data"].toMap();
-    QMap<QString, QVariant>::iterator it = map1.begin();
-    QVector<int> vec(21,1);
-    while(it != map1.end())
-      {
-        vec[it.key().toInt()] = it.value().toInt();
-      }
+  if(code == 2000){
+      QMap<QString, QVariant> map1 = map["data"].toMap();
+      QMap<QString, QVariant>::iterator it = map1.begin();
+      QVector<int> vec(21,1);
+      while(it != map1.end())
+        {
+          vec[it.key().toInt()] = it.value().toInt();
+        }
       emit mySignalState(vec);
+      //    qDebug()<<code<<vec;
 
     }else if(code == GetShowInfo){
 
@@ -98,9 +100,12 @@ void MySocket::recvData()
           onlyList.append(jsonValue[i]["identification_number"].toString());
 
           onlyHolesList.append(onlyList);
+
+
         }
 
       emit mySignalUpdateHoles(onlyHolesList);
+      //      qDebug()<<code<<onlyHolesList;
     }else if(code == GetVoltage){
       QMap<QString, QVariant> map1 = map["data"].toMap();
       QMap<QString, QVariant>::iterator it = map1.begin();
@@ -109,18 +114,41 @@ void MySocket::recvData()
         {
           vec[it.key().toInt()] = it.value().toInt();
         }
-        emit mySignalBattery(vec);
+      emit mySignalBattery(vec);
+      //      qDebug()<<code<<vec;
+    }else if(code == GetTargetInfo){
+
+      QJsonValue jsonValue = map["data"].toJsonValue();
+
+      int num = jsonValue.toArray().size();
+
+      QList<QList<QString>> onlyHolesList;
+      QList<QString> onlyList;
+      for(int i = 0;i < num;i++)
+        {
+
+          onlyList.append(jsonValue[i]["addr"].toString());
+          onlyList.append(jsonValue[i]["GroupNumber"].toString());
+          onlyList.append(jsonValue[i]["user_name"].toString());
+          onlyList.append(jsonValue[i]["cylinder_number"].toString());
+          onlyHolesList.append(onlyList);
+        }
+      emit mySignalGradeData(onlyHolesList);
     }
-
-
-
-  //      delete [] t1;
 }
 
 void MySocket::closeSocket()
 {
   close();
 }
+
+
+//void MySocket::passGroupNumber(int fenZu, int baHao, QString time)
+//{
+//  group = fenZu;
+//  number = baHao;
+//  m_time = time;
+//}
 
 
 

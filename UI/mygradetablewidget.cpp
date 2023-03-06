@@ -3,6 +3,7 @@
 MyGradeTableWidget::MyGradeTableWidget(QWidget *parent) :
   QWidget(parent,Qt::WindowStaysOnTopHint)
 {
+
   //   setAttribute(Qt::WA_DeleteOnClose,false);
 
   int nWidth = GetSystemMetrics(SM_CXSCREEN);
@@ -137,6 +138,7 @@ void MyGradeTableWidget::closeEvent(QCloseEvent *event)
 
 void MyGradeTableWidget::create()
 {
+  setWindowTitle("成绩导出");
   //弹簧
   QSpacerItem *h_spacer = new QSpacerItem(10,10,QSizePolicy::Expanding,QSizePolicy::Minimum);
   QSpacerItem *v_spacer = new QSpacerItem(10,10,QSizePolicy::Minimum,QSizePolicy::Expanding);
@@ -205,7 +207,9 @@ void MyGradeTableWidget::initTableWidget()
 {
   QStringList strList;
   strList<<tr("靶号")<<tr("分组")<<tr("姓名");
-
+  xlsx.write(1,1,"靶号");
+  xlsx.write(1,2,"分组");
+  xlsx.write(1,3,"姓名");
   for(int i = 1;i < 21;i++)
     {
       strList.append(QString::asprintf("%d",i));
@@ -249,7 +253,162 @@ void MyGradeTableWidget::check_clicked()
 {
   fenZu = lineEditGroup->text().toInt();
   baHao = lineEditNum->text().toInt();
+  if(fenZu == 0)
+    {
+      fenZu = -1;
+    }
+  if(baHao == 0)
+    {
+      baHao = -1;
+    }
 
   emit mySignalData(fenZu,baHao,currentDate);
+
+}
+
+void MyGradeTableWidget::updateGrade(QList<QList<QString> > msg)
+{
+  tableWidget->clear();
+  if(baHao != -1 && fenZu != -1)
+    {
+      QList<int> m_list;
+      QList<QString> list;
+      foreach (list, msg) {
+          m_list.append(list[3].toInt());
+        }
+      baWei = new QTableWidgetItem(QString::asprintf("%d号",baHao));
+      tableWidget->setItem(0,0,baWei);
+      xlsx.write(2,1,QString::asprintf("%d号",baHao));
+      fenZuIndex = new QTableWidgetItem(QString::asprintf("%d",fenZu));
+      tableWidget->setItem(0,1,fenZuIndex);
+      xlsx.write(2,2,QString::asprintf("%d",fenZu));
+      name = new QTableWidgetItem(msg[msg.size() - 1][2]);
+      tableWidget->setItem(0,2,name);
+      xlsx.write(2 ,3,msg[msg.size() - 1][2]);
+      for(int i = 0;i < m_list.size() && i < 20;i++)
+        {
+          onlyHuanShu = new QTableWidgetItem(QString::asprintf("%d",m_list[i]));
+          tableWidget->setItem(0,i + 3,onlyHuanShu);
+          xlsx.write(2 ,i + 4,QString::asprintf("%d",m_list[i]));
+        }
+    }else if(baHao != -1 && fenZu == -1)
+    {
+      QList<int> m_list;
+      QList<QString> list;
+      QVector<int> groupVec;
+      QVector<QString> nameVec;
+      foreach (list, msg) {
+          groupVec.push_back(list[1].toInt());
+          nameVec.push_back(list[2]);
+        }
+
+      for(int i=0;i<groupVec.size();i++){
+          for(int j=i+1;j<groupVec.size();j++){
+              if(groupVec[j]==groupVec[i]){
+                  groupVec.remove(j);
+                  j--;
+                }
+            }
+        }
+
+      for(int i=0;i<nameVec.size();i++){
+          for(int j=i+1;j<nameVec.size();j++){
+              if(nameVec[j]==nameVec[i]){
+                  nameVec.remove(j);
+                  j--;
+                }
+            }
+        }
+
+      for(int i = 0;i < groupVec.size();i++)
+        {
+          foreach (list, msg) {
+              if(groupVec[i] == list[1].toInt())
+                {
+                  m_list.append(list[3].toInt());
+                }
+
+            }
+          baWei = new QTableWidgetItem(QString::asprintf("%d号",baHao));
+          tableWidget->setItem(i,0,baWei);
+          xlsx.write(i + 2,1,QString::asprintf("%d号",baHao));
+
+
+          fenZuIndex = new QTableWidgetItem(QString::asprintf("%d",groupVec[i]));
+          tableWidget->setItem(i,1,fenZuIndex);
+          xlsx.write(i+2,2,QString::asprintf("%d",groupVec[i]));
+
+          name = new QTableWidgetItem(nameVec[i]);
+          tableWidget->setItem(i,2,name);
+          xlsx.write(i+2 ,3,nameVec[i]);
+
+          for(int j = 0;j < m_list.size() && j < 20;j++)
+            {
+              onlyHuanShu = new QTableWidgetItem(QString::asprintf("%d",m_list[j]));
+              tableWidget->setItem(i,j + 3,onlyHuanShu);
+              xlsx.write(2 + i ,j+4,QString::asprintf("%d",m_list[j]));
+            }
+        }
+    }else if(fenZu != -1 && baHao == -1)
+    {
+      QList<int> m_list;
+      QList<QString> list;
+      QVector<int> numVec;
+      QVector<QString> nameVec;
+      foreach (list, msg) {
+          numVec.push_back(list[1].toInt());
+          nameVec.push_back(list[2]);
+        }
+
+      for(int i=0;i<numVec.size();i++){
+          for(int j=i+1;j<numVec.size();j++){
+              if(numVec[j]==numVec[i]){
+                  numVec.remove(j);
+                  j--;
+                }
+            }
+        }
+
+      for(int i=0;i<nameVec.size();i++){
+          for(int j=i+1;j<nameVec.size();j++){
+              if(nameVec[j]==nameVec[i]){
+                  nameVec.remove(j);
+                  j--;
+                }
+            }
+        }
+
+      for(int i = 0;i < numVec.size();i++)
+        {
+          foreach (list, msg) {
+              if(numVec[i] == list[0].toInt())
+                {
+                  m_list.append(list[3].toInt());
+                }
+
+            }
+          baWei = new QTableWidgetItem(QString::asprintf("%d号",numVec[i]));
+          tableWidget->setItem(i,0,baWei);
+          xlsx.write(i + 2,1,QString::asprintf("%d号",numVec[i]));
+
+
+          fenZuIndex = new QTableWidgetItem(QString::asprintf("%d",fenZu));
+          tableWidget->setItem(i,1,fenZuIndex);
+          xlsx.write(i+2,2,QString::asprintf("%d",fenZu));
+
+          name = new QTableWidgetItem(nameVec[i]);
+          tableWidget->setItem(i,2,name);
+          xlsx.write(i+2 ,3,nameVec[i]);
+
+          for(int j = 0;j < m_list.size() && j < 20;j++)
+            {
+              onlyHuanShu = new QTableWidgetItem(QString::asprintf("%d",m_list[j]));
+              tableWidget->setItem(i,j + 3,onlyHuanShu);
+              xlsx.write(2 + i ,j+4,QString::asprintf("%d",m_list[j]));
+            }
+        }
+    }
+
+
 
 }

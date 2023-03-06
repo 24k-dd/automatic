@@ -42,9 +42,12 @@ signals:
 
   mySignalBattery(QVector<double> msg);
 
+  mySignalGradeData(QList<QList<QString>> msg);
+
 public slots:
   //建立通信
-  void tryConnect();
+//  void tryConnect();
+//  void passGroupNumber(int fenZu,int baHao,QString time);
 
 private:
   ip_port ipPort;
@@ -55,6 +58,10 @@ private:
   int code = 1;
 
   QString msg;
+
+  int group;
+  int number;
+  QString m_time;
 
 };
 
