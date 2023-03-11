@@ -15,8 +15,6 @@ MyGradeTableWidget::MyGradeTableWidget(QWidget *parent) :
 
   create();
 
-  initTableWidget();
-
   QDate m_date = QDate::currentDate();
   currentDate = m_date.toString("yyyy-MM-dd");
 
@@ -177,9 +175,21 @@ void MyGradeTableWidget::create()
   groupBox->setLayout(h_layout_1);
 
   tableWidget = new QTableWidget(this);
+  tableWidget->verticalHeader()->setHidden(true);
   tableWidget->setRowCount(20);
   tableWidget->setColumnCount(24);
   tableWidget->horizontalHeader()->setStyleSheet("QHeaderView::section{font:19pt '宋体';};");
+  QStringList strList;
+  strList<<tr("靶号")<<tr("分组")<<tr("姓名");
+  xlsx.write(1,1,"靶号");
+  xlsx.write(1,2,"分组");
+  xlsx.write(1,3,"姓名");
+  for(int i = 1;i < 21;i++)
+    {
+      strList.append(QString::asprintf("%d",i));
+    }
+  strList<<tr("总环数");
+  tableWidget->setHorizontalHeaderLabels(strList);
 
   QHBoxLayout *h_layout_2 = new QHBoxLayout;
 
@@ -201,22 +211,6 @@ void MyGradeTableWidget::create()
 
   setStyleSheet("QLabel,QPushButton,QLineEdit,QGroupBox,QDateEdit,QTableWidget{font-size:25px;font-bold;font-family: 微软雅黑;}");
   setLayout(v_layout_2);
-}
-
-void MyGradeTableWidget::initTableWidget()
-{
-  QStringList strList;
-  strList<<tr("靶号")<<tr("分组")<<tr("姓名");
-  xlsx.write(1,1,"靶号");
-  xlsx.write(1,2,"分组");
-  xlsx.write(1,3,"姓名");
-  for(int i = 1;i < 21;i++)
-    {
-      strList.append(QString::asprintf("%d",i));
-    }
-  strList<<tr("总环数");
-  tableWidget->setHorizontalHeaderLabels(strList);
-
 }
 
 //导出excel成绩表
@@ -262,44 +256,80 @@ void MyGradeTableWidget::check_clicked()
       baHao = -1;
     }
 
+  //  initTableWidget();
+
   emit mySignalData(fenZu,baHao,currentDate);
 
 }
 
-void MyGradeTableWidget::updateGrade(QList<QList<QString> > msg)
+void MyGradeTableWidget::updateGrade(QJsonArray msg)
 {
+
+  int msgSize = msg.size();
+
+
   tableWidget->clear();
+
+  QStringList strList;
+  int i = 1;
+  strList<<tr("靶号")<<tr("分组")<<tr("姓名");
+  xlsx.write(1,1,"靶号");
+  xlsx.write(1,2,"分组");
+  xlsx.write(1,3,"姓名");
+  for(i = 1;i < 21;i++)
+    {
+      strList.append(QString::asprintf("%d",i));
+      xlsx.write(1,3+ i,QString::asprintf("%d",i));
+    }
+  strList<<tr("总环数");
+   xlsx.write(1,3 + i,"总环数");
+  tableWidget->setHorizontalHeaderLabels(strList);
+
   if(baHao != -1 && fenZu != -1)
     {
       QList<int> m_list;
-      QList<QString> list;
-      foreach (list, msg) {
-          m_list.append(list[3].toInt());
+      for(int i = 0;i < msgSize;i++)
+        {
+          QJsonObject jsonObject = msg[i].toObject();
+          m_list.append(jsonObject["cylinder_number"].toInt());
         }
+
       baWei = new QTableWidgetItem(QString::asprintf("%d号",baHao));
       tableWidget->setItem(0,0,baWei);
       xlsx.write(2,1,QString::asprintf("%d号",baHao));
       fenZuIndex = new QTableWidgetItem(QString::asprintf("%d",fenZu));
       tableWidget->setItem(0,1,fenZuIndex);
       xlsx.write(2,2,QString::asprintf("%d",fenZu));
-      name = new QTableWidgetItem(msg[msg.size() - 1][2]);
-      tableWidget->setItem(0,2,name);
-      xlsx.write(2 ,3,msg[msg.size() - 1][2]);
-      for(int i = 0;i < m_list.size() && i < 20;i++)
+      if(msgSize > 0)
         {
+          QJsonObject s_jsonObject = msg[0].toObject();
+          name = new QTableWidgetItem(s_jsonObject["user_name"].toString());
+          tableWidget->setItem(0,2,name);
+          xlsx.write(2 ,3,s_jsonObject["user_name"].toString());
+        }
+      int sum = 0,i;
+      for(i = 0;i < m_list.size() && i < 20;i++)
+        {
+          sum += m_list[i];
           onlyHuanShu = new QTableWidgetItem(QString::asprintf("%d",m_list[i]));
           tableWidget->setItem(0,i + 3,onlyHuanShu);
           xlsx.write(2 ,i + 4,QString::asprintf("%d",m_list[i]));
         }
+      allSum = new QTableWidgetItem(QString::asprintf("%d",sum));
+      tableWidget->setItem(0,23,allSum);
+      xlsx.write(2 ,24,QString::asprintf("%d",allSum));
     }else if(baHao != -1 && fenZu == -1)
     {
-      QList<int> m_list;
-      QList<QString> list;
+
+
       QVector<int> groupVec;
       QVector<QString> nameVec;
-      foreach (list, msg) {
-          groupVec.push_back(list[1].toInt());
-          nameVec.push_back(list[2]);
+
+      for(int i = 0;i < msgSize;i++)
+        {
+          QJsonObject jsonObject = msg[i].toObject();
+          groupVec.append(jsonObject["group_number"].toInt());
+          nameVec.append(jsonObject["user_name"].toString());
         }
 
       for(int i=0;i<groupVec.size();i++){
@@ -322,13 +352,19 @@ void MyGradeTableWidget::updateGrade(QList<QList<QString> > msg)
 
       for(int i = 0;i < groupVec.size();i++)
         {
-          foreach (list, msg) {
-              if(groupVec[i] == list[1].toInt())
+          QList<int> m_list;
+          for(int s = 0;s < msgSize;s++)
+            {
+
+              QJsonObject jsonObject = msg[s].toObject();
+              if(groupVec[i] == jsonObject["group_number"].toInt())
                 {
-                  m_list.append(list[3].toInt());
+                  m_list.append(jsonObject["cylinder_number"].toInt());
                 }
 
             }
+
+
           baWei = new QTableWidgetItem(QString::asprintf("%d号",baHao));
           tableWidget->setItem(i,0,baWei);
           xlsx.write(i + 2,1,QString::asprintf("%d号",baHao));
@@ -337,27 +373,41 @@ void MyGradeTableWidget::updateGrade(QList<QList<QString> > msg)
           fenZuIndex = new QTableWidgetItem(QString::asprintf("%d",groupVec[i]));
           tableWidget->setItem(i,1,fenZuIndex);
           xlsx.write(i+2,2,QString::asprintf("%d",groupVec[i]));
+          if(nameVec.size() > i)
+            {
+              name = new QTableWidgetItem(nameVec[i]);
+              tableWidget->setItem(i,2,name);
+              xlsx.write(i+2 ,3,nameVec[i]);
+            }else{
+              name = new QTableWidgetItem("root");
+              tableWidget->setItem(i,2,name);
+              xlsx.write(i+2 ,3,"root");
+            }
 
-          name = new QTableWidgetItem(nameVec[i]);
-          tableWidget->setItem(i,2,name);
-          xlsx.write(i+2 ,3,nameVec[i]);
-
+          int sum = 0;
           for(int j = 0;j < m_list.size() && j < 20;j++)
             {
+              sum += m_list[j];
               onlyHuanShu = new QTableWidgetItem(QString::asprintf("%d",m_list[j]));
               tableWidget->setItem(i,j + 3,onlyHuanShu);
               xlsx.write(2 + i ,j+4,QString::asprintf("%d",m_list[j]));
             }
+          allSum = new QTableWidgetItem(QString::asprintf("%d",sum));
+          tableWidget->setItem(i,23,allSum);
+          xlsx.write(2 + i ,24,QString::asprintf("%d",allSum));
         }
-    }else if(fenZu != -1 && baHao == -1)
+    }
+  else if(fenZu != -1 && baHao == -1)
     {
       QList<int> m_list;
       QList<QString> list;
       QVector<int> numVec;
       QVector<QString> nameVec;
-      foreach (list, msg) {
-          numVec.push_back(list[1].toInt());
-          nameVec.push_back(list[2]);
+      for(int i = 0;i < msgSize;i++)
+        {
+          QJsonObject jsonObject = msg[i].toObject();
+          numVec.append(jsonObject["addr"].toInt());
+          nameVec.append(jsonObject["user_name"].toString());
         }
 
       for(int i=0;i<numVec.size();i++){
@@ -380,10 +430,14 @@ void MyGradeTableWidget::updateGrade(QList<QList<QString> > msg)
 
       for(int i = 0;i < numVec.size();i++)
         {
-          foreach (list, msg) {
-              if(numVec[i] == list[0].toInt())
+          QList<int> m_list;
+          for(int s = 0;s < msgSize;s++)
+            {
+
+              QJsonObject jsonObject = msg[s].toObject();
+              if(numVec[i] == jsonObject["addr"].toInt())
                 {
-                  m_list.append(list[3].toInt());
+                  m_list.append(jsonObject["cylinder_number"].toInt());
                 }
 
             }
@@ -396,19 +450,27 @@ void MyGradeTableWidget::updateGrade(QList<QList<QString> > msg)
           tableWidget->setItem(i,1,fenZuIndex);
           xlsx.write(i+2,2,QString::asprintf("%d",fenZu));
 
-          name = new QTableWidgetItem(nameVec[i]);
-          tableWidget->setItem(i,2,name);
-          xlsx.write(i+2 ,3,nameVec[i]);
-
+          if(nameVec.size() > i)
+            {
+              name = new QTableWidgetItem(nameVec[i]);
+              tableWidget->setItem(i,2,name);
+              xlsx.write(i+2 ,3,nameVec[i]);
+            }else{
+              name = new QTableWidgetItem("root");
+              tableWidget->setItem(i,2,name);
+              xlsx.write(i+2 ,3,"root");
+            }
+                int sum = 0;
           for(int j = 0;j < m_list.size() && j < 20;j++)
             {
+              sum += m_list[j];
               onlyHuanShu = new QTableWidgetItem(QString::asprintf("%d",m_list[j]));
               tableWidget->setItem(i,j + 3,onlyHuanShu);
               xlsx.write(2 + i ,j+4,QString::asprintf("%d",m_list[j]));
             }
+          allSum = new QTableWidgetItem(QString::asprintf("%d",sum));
+          tableWidget->setItem(i,23,allSum);
+          xlsx.write(2 + i ,24,QString::asprintf("%d",allSum));
         }
     }
-
-
-
 }

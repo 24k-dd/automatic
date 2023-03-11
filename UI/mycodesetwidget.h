@@ -25,6 +25,8 @@ public:
 
       void closeEvent(QCloseEvent *event);
 
+      void create();
+
 
 private slots:
 

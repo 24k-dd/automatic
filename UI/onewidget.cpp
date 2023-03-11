@@ -11,7 +11,7 @@ OneWidget::OneWidget(double size,int index,QWidget *parent) :
 
   connect(this,SIGNAL(mySignal(double)),targetSheet,SLOT(updateSize(double)));
 
-//  connect(this,SIGNAL(mySignalHoles(QList<QPointF>)),targetSheet,SLOT(updateHoles(QList<QPointF>)));
+  connect(this,SIGNAL(mySignalHoles(QList<QPointF>)),targetSheet,SLOT(updateHoles(QList<QPointF>)));
 }
 
 void OneWidget::create(double labelXY)
@@ -54,10 +54,15 @@ void OneWidget::setSize(double width)
 {
   currentWidth = width;
   targetSheet->setFixedSize(width,width);
-  labelSum->setFixedSize(width,width * 0.0857);
-  labelState->setFixedSize(width,width*0.0857);
-  scaleBody= (double)width/(double)801;
+  labelSum->setFixedSize(width,width * label_scaleBody);
+  labelState->setFixedSize(width,width*label_scaleBody);
+  scaleBody= (double)width/(double)label_img;
 
   emit mySignal(scaleBody);
+}
+
+void OneWidget::getMySignal()
+{
+  emit mySignalHoles(onlyHoleList);
 }
 

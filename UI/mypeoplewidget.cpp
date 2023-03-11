@@ -8,11 +8,6 @@ MyPeopleWidget::MyPeopleWidget(QWidget *parent) :
   create();
   connect(btn,SIGNAL(clicked()),this,SLOT(btn_clicked()));
 
-
-
-//  m_date = QDate::currentDate();
-//  currentDate = m_date.toString("yyyy-MM-dd");
-
   readText();
 
 }
@@ -114,8 +109,8 @@ void MyPeopleWidget::create()
 
 void MyPeopleWidget::btn_clicked()
 {
-
   zuhao = lineEdit->text();
+
   emit mySignalZuHao(zuhao);
   writeText();
 

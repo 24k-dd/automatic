@@ -5,6 +5,22 @@ CheckCodeWidget::CheckCodeWidget(QWidget *parent) :
   QWidget(parent,Qt::WindowStaysOnTopHint)
 {
 
+  create();
+
+  connect(btn1,SIGNAL(clicked()),this,SLOT(btn1Slots()));
+
+  connect(btn2,SIGNAL(clicked()),this,SLOT(btn2Slots()));
+
+}
+
+
+void CheckCodeWidget::closeEvent(QCloseEvent *event)
+{
+  emit mySignalFlag();
+}
+
+void CheckCodeWidget::create()
+{
   setWindowTitle("校准程序");
   setFixedSize(650,200);
   //窗口关闭时清空资源
@@ -38,18 +54,7 @@ CheckCodeWidget::CheckCodeWidget(QWidget *parent) :
   layout->addWidget(btn2);
   layout->addItem(h_spacer);
   setLayout(layout);
-
-  connect(btn1,SIGNAL(clicked()),this,SLOT(btn1Slots()));
-  connect(btn2,SIGNAL(clicked()),this,SLOT(btn2Slots()));
-
   setStyleSheet("QLabel,QPushButton,QLineEdit{width: 100px;height: 100px;font-size: 30px;font-bold;font-family: 微软雅黑;}");
-
-}
-
-
-void CheckCodeWidget::closeEvent(QCloseEvent *event)
-{
-  emit mySignalFlag();
 }
 
 void CheckCodeWidget::btn1Slots()

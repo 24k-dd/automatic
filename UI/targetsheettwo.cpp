@@ -80,6 +80,7 @@ void TargetSheetTwo::paintEvent(QPaintEvent *event)
 
 void TargetSheetTwo::updateHoles(QList<QPointF> msg)
 {
+  onlyHoleList.clear();
   onlyHoleList = msg;
 }
 

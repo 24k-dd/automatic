@@ -25,9 +25,9 @@ MyTableWidget::MyTableWidget(QWidget *parent) : QTableWidget(parent)
 
     }
   this->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    this->setStyleSheet("QTableWidget{width: 100px;height: 100px;border: 1px solid green;background: white;}""QScrollBar:vertical{max-width: 10px;max-height:10px;}"
-                        "QScrollBar:horizontal{max-width: 10px;max-height:10px;}");
-
+  this->setStyleSheet("QTableWidget{width: 100px;height: 100px;border: 1px solid green;background: white;}""QScrollBar:vertical{max-width: 10px;max-height:10px;}"
+                      "QScrollBar:horizontal{max-width: 10px;max-height:10px;}"
+                      "QTableWidgetItem{color:black;font-size:25px;font-weight: simsun; font-family: 微软雅黑;font-bold;}");
 }
 
 

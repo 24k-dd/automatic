@@ -51,17 +51,13 @@ public:
   explicit MainWindow(QWidget *parent = nullptr);
   ~MainWindow();
 
-  create();
+  void create();
 
-  //请求连接状态
-  void updateState();
-
-  //请求电量
-  void updateBattery();
+  //请求连接状态和电量
+  void updateStateAndBattery();
 
 signals:
   void mySignal(int msg); //自定义信号函数,msg参数可以省略
-
 
 private slots:
   void clearall_clicked();
@@ -78,25 +74,10 @@ private slots:
 
   void close_clicked();
 
-  void sendYuanXin(int old_addr,int new_addr);//编码设置
+  void doubleClicked(int msg);
 
-  void sendBegin(int flag);//下一个
-
-  void sendOver(int flag);//结束
-
-  void searchData(int fenZu,int baHao,QString time);
-
-  void clearBtn();
-
-  void groupNumber(QString indexZuHao);
-
-  //显示详细信息
-  void listWidgetDoubleClicked(QListWidgetItem *item);
-
-  //添加选中阴影
-  void listWidgeSelectionChanged(QListWidgetItem* item);
-
-  void passStateData(QVector<int> msg);
+  //只允许同时打开一个界面
+  void updateFlag();
 
 private:
 
@@ -104,18 +85,15 @@ private:
 
   MyListWidget *myListWidget = NULL;
 
-
-  int index;//详细信息界面序号
-
   int index2 = -1;
 
   int index3 = -2;
 
 public:
-    //屏幕宽度
-    double nWidth;
+  //屏幕宽度
+  double nWidth;
 
-    double nHeight;
+  double nHeight;
 
 public:
   QListWidget *listWidget = NULL;
@@ -123,13 +101,17 @@ public:
   QToolButton *act[6];
 
 
+  QVector<int> vecState;
+
+  int group_number = -1;
+
 public:
   bool m_flag = true;
 
   QTimer m_Timer;
 
 public slots:
-    void updateFlag();
+
 
 };
 

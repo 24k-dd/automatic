@@ -1,5 +1,7 @@
 #ifndef MODEL_H
 #define MODEL_H
+
+
 #include<QString>
 #include<QProcess>
 #include<QVariantList>
@@ -8,28 +10,30 @@
 #include<QByteArray>
 #include<QApplication>
 #include<QJsonObject>
+#include<QVector>
 
-typedef struct tableOne{
+using namespace std;
+//typedef struct tableOne{
 
-  int addr;
-  double x;
-  double y;
-  int cylinder_number;
-  int direction;
-  QString user_name;
-  QString identification_number;
-}TableOne;
-Q_DECLARE_METATYPE(TableOne)
+//  int addr;
+//  double x;
+//  double y;
+//  int cylinder_number;
+//  int direction;
+//  QString user_name;
+//  QString identification_number;
+//}TableOne;
+//Q_DECLARE_METATYPE(TableOne)
 
-typedef struct tableTwo{
-  int id;
-  int addr;
-  QString user_name;
-  QString identification_number;
-  int is_delete;
-}TableTwo;
+//typedef struct tableTwo{
+//  int id;
+//  int addr;
+//  QString user_name;
+//  QString identification_number;
+//  int is_delete;
+//}TableTwo;
 
-Q_DECLARE_METATYPE(TableTwo)
+//Q_DECLARE_METATYPE(TableTwo)
 
 // 控制命令接口路由值 10000-19999
 // RewriteTargetId 重写地址
@@ -47,7 +51,6 @@ const int CloseInfoEntry = 10005;
 // UserGrouping 配置分组
 const int UserGrouping = 10006;
 
-
 // 获取信息接口路由值 20000-29999
 // GetTargetInfo 获取
 const int    GetTargetInfo = 20000;
@@ -58,6 +61,20 @@ const int    GetShowInfo = 20002;
 // GetVoltage 获取电压
 const int    GetVoltage = 20003;
 
+//状态电量请求间隔
+const int state_time = 5000;
+
+//靶标请求间隔
+const int holes_time = 1000;
+
+//靶标数目
+const int array_size = 21;
+
+//标签缩小比例
+const double label_scaleBody = 0.0857;
+
+//靶标大小
+const int label_img = 801;
 
 
 
@@ -118,8 +135,6 @@ inline QVariantList toJsonData(QString strm,int code,int addr,bool flag)
 
   var.insert("msg", var1);
   QVariantMap var2;
-
-  //  var2.insert("group_number",-1);
 
   if(flag == true)
     {

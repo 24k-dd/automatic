@@ -6,31 +6,23 @@ MainWindow::MainWindow(QWidget *parent) :
 {
   runMain();
 
-  myListWidget = new MyListWidget();
+  myListWidget = new MyListWidget;
 
-  mySocket = new MySocket(this);
+  mySocket = new MySocket();
 
+  //创建布局
   create();
 
-  //双击放大
-  connect(myListWidget,SIGNAL(itemDoubleClicked(QListWidgetItem*)),this,SLOT(listWidgetDoubleClicked(QListWidgetItem*)));
+  connect(myListWidget,SIGNAL(mySignalDoubleIndex(int)),this,SLOT(doubleClicked(int)));
 
-  //单击选中
-  connect(myListWidget,SIGNAL(itemClicked(QListWidgetItem*)),this,SLOT(listWidgeSelectionChanged(QListWidgetItem*)));
+  connect(myListWidget,SIGNAL(mySignalDoubleIndex(int)),mySocket,SLOT(updateIndex(int)));
 
+  connect(myListWidget, SIGNAL(mySignalIndex(int)), mySocket, SLOT(updateIndex(int)));
   //更新靶标子弹
-  connect(mySocket,SIGNAL(mySignalUpdateHoles(QList<QList<QString> >)),myListWidget,SLOT(passHolesData(QList<QList<QString> >)));
+    connect(mySocket,SIGNAL(mySignalUpdateHoles(QJsonArray)),myListWidget,SLOT(passHolesData(QJsonArray)));
 
-  //更新连接状态
-  connect(mySocket,SIGNAL(mySignalState(QVector<int>)),myListWidget,SLOT(passStateData(QVector<int>)));
-
-  //根据连接状态请求相应靶标接口
-  connect(mySocket,SIGNAL(mySignalState(QVector<int>)),this,SLOT(passStateData(QVector<int>)));
-
-
+  //获取电量
   connect(mySocket,SIGNAL(mySignalBattery(QVector<double>)),myListWidget,SLOT(passBatteryData(QVector<double>)));
-
-
 
   //进行信号槽关联
   connect(act[0],SIGNAL(clicked()),this,SLOT(clearall_clicked()));
@@ -41,7 +33,7 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(act[5],SIGNAL(clicked()),this,SLOT(grade_clicked()));
   connect(act[6],SIGNAL(clicked()),this,SLOT(close_clicked()));
 
-  m_Timer.setInterval(1000);
+  m_Timer.setInterval(state_time);
 
   //开启定时器
   m_Timer.start();
@@ -49,16 +41,13 @@ MainWindow::MainWindow(QWidget *parent) :
   //监听定时器发送的信号
   connect(&m_Timer,&QTimer::timeout,[=](){
 
-      updateState();
-
-      updateBattery();
+      updateStateAndBattery();
 
     });
 
-
 }
 
-MainWindow::create()
+void MainWindow::create()
 {
   setWindowTitle("标靶显示系统");
   setWindowIcon(QIcon(":/Img/app-icon.gif"));
@@ -136,6 +125,7 @@ MainWindow::create()
   v_layout->addWidget(myListWidget);
 
   setLayout(v_layout);
+
 }
 
 MainWindow::~MainWindow()
@@ -156,8 +146,6 @@ void MainWindow::close_clicked()
           this->close();
         }
     }
-
-
 }
 
 //全部清空
@@ -176,18 +164,19 @@ void MainWindow::clearall_clicked()
 //单个清除
 void MainWindow::clearonly_clicked()
 {
-  QString str1;
+  index2 = myListWidget->getIndex() + 1;
+
   if(index2 == -1)
     {
       QMessageBox::information(this,tr("提示"),tr("请选中靶标!"),QMessageBox::Ok);
     }else{
 
-      QVariantList varList = toJsonData("addr",ClearTarget,index2 + 1,true);
+      QVariantList varList = toJsonData("addr",ClearTarget,index2,true);
       QByteArray data = mapToByteArry(varList);
 
       mySocket->sendData(data);
 
-      qDebug()<<"主界面单个清除指令已发送:"<<data;
+      qDebug()<<"主界面单个清除指令已发送:"<<index2<<data;
     }
 }
 
@@ -200,9 +189,9 @@ void MainWindow::codeset_clicked()
       MyCodeSetWidget *myCodeSetWidget = new MyCodeSetWidget();
 
       //编码设置发送
-      connect(myCodeSetWidget,SIGNAL(mySignalCodeSetting(int,int)),this,SLOT(sendYuanXin(int,int)));
+      connect(myCodeSetWidget,SIGNAL(mySignalCodeSetting(int,int)),mySocket,SLOT(sendYuanXin(int,int)));
       //传递编码设置索引
-      connect(this,SIGNAL(mySignal(int)),myCodeSetWidget,SLOT(getIndex(int)));
+      connect(myListWidget,SIGNAL(mySignalIndex(int)),myCodeSetWidget,SLOT(getIndex(int)));
       //判断窗口状态
       connect(myCodeSetWidget,SIGNAL(mySignalFlag()),this,SLOT(updateFlag()));
       myCodeSetWidget->show();
@@ -221,11 +210,11 @@ void MainWindow::calib_clicked()
       CheckCodeWidget *checkCodeWidget = new CheckCodeWidget();
 
       //传递校准程序索引
-      connect(this,SIGNAL(mySignal(int)),checkCodeWidget,SLOT(getCurrentIndex(int)));
+      connect(myListWidget,SIGNAL(mySignalIndex(int)),checkCodeWidget,SLOT(getCurrentIndex(int)));
 
       //开始校准索引
-      connect(checkCodeWidget,SIGNAL(mySignalBegin(int)),this,SLOT(sendBegin(int)));//下一个
-      connect(checkCodeWidget,SIGNAL(mySignalOver(int)),this,SLOT(sendOver(int)));//结束
+      connect(checkCodeWidget,SIGNAL(mySignalBegin(int)),mySocket,SLOT(sendBegin(int)));//下一个
+      connect(checkCodeWidget,SIGNAL(mySignalOver(int)),mySocket,SLOT(sendOver(int)));//结束
       connect(checkCodeWidget,SIGNAL(mySignalFlag()),this,SLOT(updateFlag()));
       checkCodeWidget->show();
       m_flag = false;
@@ -241,17 +230,16 @@ void MainWindow::people_clicked()
       MyPeopleWidget *myPeopleWidget = new MyPeopleWidget();
 
       //分组编号
-      connect(myPeopleWidget, SIGNAL(mySignalZuHao(QString)), this, SLOT(groupNumber(QString)));
+      connect(myPeopleWidget, SIGNAL(mySignalZuHao(QString)), mySocket, SLOT(groupNumber(QString)));
 
       connect(myPeopleWidget,SIGNAL(mySignalFlag()),this,SLOT(updateFlag()));
-
 
       myPeopleWidget->show();
       m_flag = false;
     }
 }
 
-//成绩导入
+//成绩导出
 void MainWindow::grade_clicked()
 {
   if(m_flag)
@@ -261,209 +249,57 @@ void MainWindow::grade_clicked()
 
       connect(myGradeTableWidget,SIGNAL(mySignalFlag()),this,SLOT(updateFlag()));
 
-      connect(myGradeTableWidget,SIGNAL(mySignalData(int,int,QString)),this,SLOT(searchData(int,int,QString)));
+      //查询数据，请求接口
+      connect(myGradeTableWidget,SIGNAL(mySignalData(int,int,QString)),mySocket,SLOT(searchData(int,int,QString)));
 
-//      connect(myGradeTableWidget,SIGNAL(mySignalData(int,int,QString)),mySocket,SLOT(passGroupNumber(int,int,QString)));
-
-       connect(mySocket,SIGNAL(mySignalGradeData(QList<QList<QString> >)),myGradeTableWidget,SLOT(updateGrade(QList<QList<QString> >)));
+      //显示查询到的数据
+      connect(mySocket,SIGNAL(mySignalGradeData(QJsonArray)),myGradeTableWidget,SLOT(updateGrade(QJsonArray)));
       myGradeTableWidget->show();
       m_flag = false;
     }
 
-
 }
 
-//发送原新编码
-void MainWindow::sendYuanXin(int old_addr,int new_addr)
+//更新连接状态
+void MainWindow::updateStateAndBattery()
 {
 
-  QVariantList varList;
+  QVariantList varListState = toJsonData("addr",GetTargetState,-1,false);
 
-  QVariantMap var;
-  var.insert("code", RewriteTargetId);
-  QVariantMap var1;
+  QByteArray dataState = mapToByteArry(varListState);
 
-  var.insert("msg", var1);
-  QVariantMap var2;
+  mySocket->sendData(dataState);
 
-  var2.insert("old_addr",old_addr);
-  var2.insert("new_addr",new_addr);
+  QVariantList varListBattery = toJsonData("addr",GetVoltage,-1,false);
+  QByteArray dataBattery  = mapToByteArry(varListBattery);
 
-  var.insert("data", var2);
-
-  varList << var;
-
-  QByteArray data = mapToByteArry(varList);
-
-  mySocket->sendData(data);
-
-  qDebug()<<"编码设置指令已发送:"<<data;
+  mySocket->sendData(dataBattery );
 }
 
-//发送指定校准靶号
-void MainWindow::sendBegin(int flag)
+void MainWindow::doubleClicked(int msg)
 {
-
-
-  QVariantList varList = toJsonData("addr",OpenCalibrationTargetById,flag,true);
-
-  QByteArray data = mapToByteArry(varList);
-
-  mySocket->sendData(data);
-
-  qDebug()<<"开始校准指令已发送:"<<data;
-}
-
-//发送end
-void MainWindow::sendOver(int flag)
-{
-
-  QVariantList varList = toJsonData("addr",CloseCalibrationTargetById,flag,true);
-
-  QByteArray data = mapToByteArry(varList);
-
-  mySocket->sendData(data);
-
-  qDebug()<<"结束指令已发送:"<<data;
-}
-
-void MainWindow::searchData(int fenZu, int baHao, QString time)
-{
-  QVariantList varList;
-
-  QVariantMap var;
-  var.insert("code", GetTargetInfo);
-  QVariantMap var1;
-  var1.insert("create_at",time);
-
-  var.insert("msg", var1);
-  QVariantMap var2;
-
-  var2.insert("addr",baHao);
-  var2.insert("group_number",fenZu);
-
-  var.insert("data", var2);
-
-  varList << var;
-
-  QByteArray data = mapToByteArry(varList);
-
-  mySocket->sendData(data);
-
-  qDebug()<<"编码设置指令已发送:"<<data;
-}
-
-
-
-void MainWindow::updateState()
-{
-
-  QVariantList varList = toJsonData("addr",GetTargetState,1,false);
-
-  QByteArray data = mapToByteArry(varList);
-
-  mySocket->sendData(data);
-}
-
-//请求电量
-void MainWindow::updateBattery()
-{
-  QVariantList varList = toJsonData("addr",GetVoltage,1,false);
-  QByteArray data = mapToByteArry(varList);
-
-  mySocket->sendData(data);
-}
-
-
-
-//单个清除
-void MainWindow::clearBtn()
-{
-
-
-  QVariantList varList = toJsonData("addr",ClearTarget,index2 + 1,true);
-
-  QByteArray data = mapToByteArry(varList);
-
-  mySocket->sendData(data);
-
-  qDebug()<<"详细信息界面单个清除已发送:"<<data;
-}
-
-
-void MainWindow::groupNumber(QString indexZuHao)
-{
-
-  QVariantList varList = toJsonData("group_number",UserGrouping,indexZuHao.toInt(),true);
-
-  QByteArray data = mapToByteArry(varList);
-
-  mySocket->sendData(data);
-
-  qDebug()<<"分组指令已发送:"<<data;
-}
-
-
-//详细信息界面
-void MainWindow::listWidgetDoubleClicked(QListWidgetItem *item)
-{
-  //详细信息
+index2 = myListWidget->getIndex() + 1;
+//  详细信息
   if(m_flag)
     {
-      MyWidget *myWidget = new MyWidget();
-
+      MyWidget *myWidget = new MyWidget(index2);
       //传递详细信息界面索引
-      connect(this, SIGNAL(mySignal(int)), myWidget, SLOT(getIndex(int)));
+      connect(myListWidget, SIGNAL(mySignalIndex(int)), myWidget, SLOT(getIndex(int)));
+       connect(myListWidget, SIGNAL(mySignalDoubleIndex(int)), myWidget, SLOT(getIndex(int)));
 
       //详细信息界面清除按钮
-      connect(myWidget, SIGNAL(mySignalBtn()), this, SLOT(clearBtn()));
+      connect(myWidget, SIGNAL(mySignalBtn()), this, SLOT(clearonly_clicked()));
 
       connect(myWidget, SIGNAL(mySignalFlag()), this, SLOT(updateFlag()));
 
-      connect(mySocket,SIGNAL(mySignalUpdateHoles(QList<QList<QString> >)),myWidget,SLOT(passHolesData(QList<QList<QString>>)));
+      connect(mySocket,SIGNAL(mySignalOnlyTarget(QJsonArray)),myWidget,SLOT(passHolesData(QJsonArray)));
 
-      connect(mySocket,SIGNAL(mySignalBattery(QVector<double>)),myWidget,SLOT(passBatteryData(QVector<double>)));
-      index = myListWidget->currentRow();
-      emit mySignal(index);
+      connect(mySocket,SIGNAL(mySignalBatteryValue(double)),myWidget,SLOT(passBatteryData(double)));
+
       myWidget->show();
       m_flag = false;
     }
-
 }
-
-//添加背景阴影
-void MainWindow::listWidgeSelectionChanged(QListWidgetItem* ite)
-{
-  //标记
-  index3 = index2;
-
-  index2 = myListWidget->currentRow();
-  myListWidget->item[index2]->setBackgroundColor(QColor("#a8a8a8"));
-  if(index3 > -1 && index3 < 21 && index2 != index3)
-    {
-      myListWidget->item[index3]->setBackgroundColor(QColor(Qt::white));
-    }
-  emit mySignal(index2);
-}
-
-void MainWindow::passStateData(QVector<int> msg)
-{
-  for(int i = 1;i < msg.size();i++)
-    {
-      if(msg[i] != 1 || 1==1)
-        {
-          QVariantList varList = toJsonData("addr",GetShowInfo,msg[i],true);
-
-          QByteArray data = mapToByteArry(varList);
-          qDebug()<<data;
-
-          mySocket->sendData(data);
-          break;
-        }
-
-    }
-}
-
 
 //判断窗口是否打开
 void MainWindow::updateFlag()

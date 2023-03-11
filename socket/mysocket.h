@@ -13,8 +13,12 @@
 #include<QJsonArray>
 #include<QVariant>
 #include<QVector>
+#include<QTimer>
+#include<QDate>
+
 #include"Model.h"
 #include"ip_port.h"
+
 
 
 class MySocket : public QTcpSocket
@@ -23,8 +27,6 @@ class MySocket : public QTcpSocket
 
 public:
   explicit MySocket(QObject *parent = nullptr);
-
-
 
   //发m送数据
   void sendData(QString msg);
@@ -35,34 +37,63 @@ public:
   //关闭通信
   void closeSocket();
 
-signals:
-  mySignalUpdateHoles(QList<QList<QString>> msg);
+  void updateHoles();
 
-  mySignalState(QVector<int> msg);
+
+
+signals:
+  mySignalUpdateHoles(QJsonArray jsonArry);
+
+  mySignalOnlyTarget(QJsonArray jsonArry);
 
   mySignalBattery(QVector<double> msg);
 
-  mySignalGradeData(QList<QList<QString>> msg);
+  mySignalBatteryValue(double msg);
+
+  mySignalGradeData(QJsonArray jsonArry);
+
+  mySignalState(QVector<int> msg);
+
+
 
 public slots:
   //建立通信
-//  void tryConnect();
-//  void passGroupNumber(int fenZu,int baHao,QString time);
+
+  void groupNumber(QString indexZuHao);
+
+
+  void sendYuanXin(int old_addr,int new_addr);//编码设置
+
+  void sendBegin(int flag);//下一个
+
+  void sendOver(int flag);//结束
+
+  void searchData(int fenZu,int baHao,QString time);
+
+  void sendHoles(int msg);
+
+  void updateIndex(int msg);
+
+
 
 private:
   ip_port ipPort;
 
+  QList<QList<QString>> onlyHolesList;
+
   //  QString Ip = ipPort.ip;
   //  int Port = ipPort.port;
-
+QTimer m_Timer;
   int code = 1;
 
   QString msg;
+   QVector<int> vecState;
 
-  int group;
-  int number;
-  QString m_time;
 
+  int group_number = -1;
+
+  int s_index = -1;
+double batteryValue = 0;
 };
 
 #endif // MYSOCKET_H

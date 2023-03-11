@@ -30,7 +30,7 @@ signals:
 
   mySignal(QList<QPointF> msg);
 public:
-  explicit MyWidget(QWidget *parent = nullptr);
+  explicit MyWidget(int index2,QWidget *parent = nullptr);
   ~MyWidget();
 
   void create();
@@ -46,9 +46,9 @@ public slots:
   void clearBtn();
 
   //获取数据库表1数据
-  void passHolesData(QList<QList<QString>> msg);
+  void passHolesData(QJsonArray msg);
 
-  void passBatteryData(QVector<double> msg);
+  void passBatteryData(double msg);
 
 private:
 
@@ -71,13 +71,12 @@ private:
   //清除按钮
   QPushButton *clearButton = NULL;
 
-  int index = 4;
+  int index = 4,s_index = 0;
+
+  QString user_name = "";
 
   bool flag = true;
 
-
-  TableOne *t1 = NULL;
-  TableTwo *t2 = NULL;
   int current_cnt1 = 0;
   int current_cnt2 = 0;
 

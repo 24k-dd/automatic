@@ -30,6 +30,8 @@ public:
   //关闭窗口时传递信号
   void closeEvent(QCloseEvent *event);
 
+  void create();
+
 private slots:
   //获取QListWidget的当前id
   void getCurrentIndex(int index);

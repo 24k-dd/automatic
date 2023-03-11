@@ -4,6 +4,21 @@ MyCodeSetWidget::MyCodeSetWidget(QWidget *parent) :
   QWidget(parent,Qt::WindowStaysOnTopHint)
 {
 
+  //创建布局
+  create();
+
+
+  connect(btn1,SIGNAL(clicked()),this,SLOT(btn1Slots()));
+}
+
+void MyCodeSetWidget::closeEvent(QCloseEvent *event)
+{
+  emit mySignalFlag();
+
+}
+
+void MyCodeSetWidget::create()
+{
   setWindowTitle("地址设置");
   setFixedSize(700,200);
 
@@ -37,7 +52,6 @@ MyCodeSetWidget::MyCodeSetWidget(QWidget *parent) :
   btn1 = new QPushButton("发送");
   btn1->setFixedSize(180,60);
 
-
   //弹簧
   h_spacer = new QSpacerItem(10,10,QSizePolicy::Expanding,QSizePolicy::Minimum);
 
@@ -56,16 +70,7 @@ MyCodeSetWidget::MyCodeSetWidget(QWidget *parent) :
   layout->addItem(h_spacer);
   setLayout(layout);
 
-  connect(btn1,SIGNAL(clicked()),this,SLOT(btn1Slots()));
-
   setStyleSheet("QLabel,QPushButton,QLineEdit{width: 100px;height: 100px;font-size: 30px;font-bold;font-family: 微软雅黑;}");
-
-}
-
-void MyCodeSetWidget::closeEvent(QCloseEvent *event)
-{
-  emit mySignalFlag();
-
 }
 
 
@@ -73,10 +78,10 @@ void MyCodeSetWidget::closeEvent(QCloseEvent *event)
 void MyCodeSetWidget::btn1Slots()
 {
 
-    int yuan = flag;
-    int xin = comboBox->currentIndex() + 1;
+  int yuan = flag;
+  int xin = comboBox->currentIndex() + 1;
 
-    emit mySignalCodeSetting(yuan,xin);
+  emit mySignalCodeSetting(yuan,xin);
 
 }
 

@@ -63,6 +63,7 @@ void TargetSheet::paintEvent(QPaintEvent *event)
 
 void TargetSheet::updateHoles(QList<QPointF> msg)
 {
+  onlyHoleList.clear();
   onlyHoleList = msg;
 }
 

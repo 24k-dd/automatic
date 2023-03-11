@@ -3,7 +3,7 @@
 
 #include <QListWidget>
 #include<QWheelEvent>
-
+#include<QJsonObject>
 #include"onewidget.h"
 
 
@@ -21,6 +21,8 @@ public:
   //初始化列表
   void initListWidget();
 
+  int getIndex();
+
   //滚轮放缩事件
   void wheelEvent(QWheelEvent *event);
 
@@ -28,14 +30,20 @@ public:
 
 signals:
   mySignal(QList<QPointF> msg);
-
+  mySignalDoubleIndex(int msg);
+mySignalIndex(int msg);
 
 public slots:
   //获取数据库表1数据
-  void passHolesData(QList<QList<QString>> msg);
+  void passHolesData(QJsonArray msg);
 
-  void passStateData(QVector<int> msg);
   void passBatteryData(QVector<double> msg);
+
+  //显示详细信息
+  void listWidgetDoubleClicked(QListWidgetItem *item);
+
+  //添加选中阴影
+  void listWidgeSelectionChanged(QListWidgetItem* item);
 
 public:
   double screenWidth;
@@ -54,13 +62,11 @@ public:
 
   QTimer m_Timer;
 
-  //  TableOne *t1 = NULL;
-  //  TableTwo *t2 = NULL;
+  int s_index = 1;//详细信息界面序号
 
-  //  //  int before_cnt1 = 0;
-  //  //  int before_cnt2 = 0;
-  //  int current_cnt1 = 0;
-  //  int current_cnt2 = 0;
+  int index2 = -1;
+
+  int index3 = -2;
 
 
 };

@@ -38,8 +38,6 @@ public:
   void closeEvent(QCloseEvent *event);
 
   void create();
-
-  void initTableWidget();
 //  void checkGrade(QVector<int> numVec,QVector<QString> nameVec,int baHao,int fenZu);
 
 public slots:
@@ -56,8 +54,7 @@ signals:
 private slots:
   void check_clicked();
 
-  void updateGrade(QList<QList<QString>> msg);
-
+  void updateGrade(QJsonArray jsonArry);
 
   void dateChange(const QDate &date);
 

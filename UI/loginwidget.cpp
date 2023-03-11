@@ -4,9 +4,6 @@ LoginWidget::LoginWidget(QWidget *parent) :
   QWidget(parent)
 {
   create();
-
-
-
 }
 
 LoginWidget::~LoginWidget()
@@ -21,6 +18,7 @@ void LoginWidget::closeEvent(QCloseEvent *event)
   if(flag == 1)
     {
       // 通过进程名字结束进程
+      QProcess::startDetached("taskkill -t  -f /IM " + QString("main.exe"));
       QProcess::startDetached("taskkill -t  -f /IM " + QString("main.exe"));
     }
 }
@@ -62,14 +60,12 @@ void LoginWidget::create()
   pushButton_login->setFixedSize(280,35);
   pushButton_login->setStyleSheet("QPushButton{width: 100px;height: 100px;border: 1px solid green;font-family: 微软雅黑;border-radius: 15px;font-size: 18px;background-color: #00ffff}""QPushButton:pressed{background:white;}");
 
-
   //菜单栏界面
   mainWindow = new MainWindow();
 
   //输入密码
   lineEdit_username->setText("admin");
   lineEdit_password->setText("123456");
-
 
   //弹簧
   QSpacerItem *h_spacer = new QSpacerItem(10,10,QSizePolicy::Expanding,QSizePolicy::Minimum);
