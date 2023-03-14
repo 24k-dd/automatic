@@ -27,7 +27,7 @@ public:
 signals:
 
 private slots:
-//  void on_pushButton_login_clicked();
+
   void login_clicked();
 
 
@@ -39,8 +39,6 @@ private:
   QLineEdit *lineEdit_password = NULL;
   QString username;
   QString password;
-
-
 
   int flag = 1;
 

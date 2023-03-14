@@ -317,7 +317,7 @@ void MyGradeTableWidget::updateGrade(QJsonArray msg)
         }
       allSum = new QTableWidgetItem(QString::asprintf("%d",sum));
       tableWidget->setItem(0,23,allSum);
-      xlsx.write(2 ,24,QString::asprintf("%d",allSum));
+      xlsx.write(2 ,24,QString::asprintf("%d",sum));
     }else if(baHao != -1 && fenZu == -1)
     {
 
@@ -394,7 +394,7 @@ void MyGradeTableWidget::updateGrade(QJsonArray msg)
             }
           allSum = new QTableWidgetItem(QString::asprintf("%d",sum));
           tableWidget->setItem(i,23,allSum);
-          xlsx.write(2 + i ,24,QString::asprintf("%d",allSum));
+          xlsx.write(2 + i ,24,QString::asprintf("%d",sum));
         }
     }
   else if(fenZu != -1 && baHao == -1)
@@ -470,7 +470,7 @@ void MyGradeTableWidget::updateGrade(QJsonArray msg)
             }
           allSum = new QTableWidgetItem(QString::asprintf("%d",sum));
           tableWidget->setItem(i,23,allSum);
-          xlsx.write(2 + i ,24,QString::asprintf("%d",allSum));
+          xlsx.write(2 + i ,24,QString::asprintf("%d",sum));
         }
     }
 }

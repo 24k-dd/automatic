@@ -36,9 +36,10 @@ private slots:
   //获取QListWidget的当前id
   void getCurrentIndex(int index);
 
-  //按钮1
+  //开始校准
   void btn1Slots();
-  //按钮2
+
+  //结束
   void btn2Slots();
 
 signals:

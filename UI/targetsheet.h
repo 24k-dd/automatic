@@ -30,17 +30,13 @@ public slots:
   void updateHoles(QList<QPointF>  msg);
   void updateSize(double size);
 
-
-
 private:
-  //    QList<QPoint>   holeList;                // 定义弹孔列表对象
-
   QImage          backgroundImage ;        // 定义靶纸背景对象
   QPixmap         bulletImage;             // 定义弹孔图对象
   QPointF          bulletCenter;            // 弹孔图片中心坐标
 
   QTimer m_timer;
-public:
+
   QList<QPointF>   onlyHoleList = {};                // 定义每个靶对象
 
 };

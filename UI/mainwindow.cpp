@@ -4,6 +4,7 @@
 MainWindow::MainWindow(QWidget *parent) :
   QWidget(parent)
 {
+  //运行主程序
   runMain();
 
   myListWidget = new MyListWidget;
@@ -13,16 +14,22 @@ MainWindow::MainWindow(QWidget *parent) :
   //创建布局
   create();
 
+
+  //双击打开详细界面
   connect(myListWidget,SIGNAL(mySignalDoubleIndex(int)),this,SLOT(doubleClicked(int)));
 
+  //单 双击 更新通信里的id
   connect(myListWidget,SIGNAL(mySignalDoubleIndex(int)),mySocket,SLOT(updateIndex(int)));
-
   connect(myListWidget, SIGNAL(mySignalIndex(int)), mySocket, SLOT(updateIndex(int)));
-  //更新靶标子弹
-    connect(mySocket,SIGNAL(mySignalUpdateHoles(QJsonArray)),myListWidget,SLOT(passHolesData(QJsonArray)));
 
-  //获取电量
+  //更新所有靶标
+  connect(mySocket,SIGNAL(mySignalUpdateHoles(QJsonArray)),myListWidget,SLOT(passHolesData(QJsonArray)));
+
+  //更新所有靶标电量
   connect(mySocket,SIGNAL(mySignalBattery(QVector<double>)),myListWidget,SLOT(passBatteryData(QVector<double>)));
+
+  //更新所有靶标状态
+  connect(mySocket,SIGNAL(mySignalState(QVector<int>)),myListWidget,SLOT(passStateData(QVector<int>)));
 
   //进行信号槽关联
   connect(act[0],SIGNAL(clicked()),this,SLOT(clearall_clicked()));
@@ -33,6 +40,9 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(act[5],SIGNAL(clicked()),this,SLOT(grade_clicked()));
   connect(act[6],SIGNAL(clicked()),this,SLOT(close_clicked()));
 
+  updateStateAndBattery();
+
+  //每隔5s请求一次
   m_Timer.setInterval(state_time);
 
   //开启定时器
@@ -41,10 +51,10 @@ MainWindow::MainWindow(QWidget *parent) :
   //监听定时器发送的信号
   connect(&m_Timer,&QTimer::timeout,[=](){
 
+      //更新状态和电量
       updateStateAndBattery();
 
     });
-
 }
 
 void MainWindow::create()
@@ -84,27 +94,26 @@ void MainWindow::create()
   act[2] = new QToolButton(this);
   act[2]->setFixedWidth(170);
   act[2]->setText("地址设置");
-
+  act[2]->setToolTip("对靶标地址进行设置");
 
   act[3] = new QToolButton(this);
   act[3]->setFixedWidth(170);
   act[3]->setText("校准程序");
-
+  act[3]->setToolTip("对靶标进行校准");
 
   act[4] = new QToolButton(this);
   act[4]->setFixedWidth(170);
   act[4]->setText("人员分组");
-
+  act[4]->setToolTip("对人员进行分组");
 
   act[5] = new QToolButton(this);
   act[5]->setFixedWidth(170);
   act[5]->setText("成绩导出");
+  act[5]->setToolTip("查询打靶数据或对查询数据进行导出");
 
   act[6] = new QToolButton(this);
   act[6]->setFixedWidth(170);
   act[6]->setText("退出程序");
-
-
 
   //按钮美化
   setStyleSheet("QToolButton,QComboBox{width: 100px;height: 100px;font-size: 25px;font-bold;border: 1px solid green;font-family: 微软雅黑;border-radius: 17px;background-color: #00ffff}""QToolButton:pressed{background:white;}\
@@ -125,7 +134,6 @@ void MainWindow::create()
   v_layout->addWidget(myListWidget);
 
   setLayout(v_layout);
-
 }
 
 MainWindow::~MainWindow()
@@ -187,13 +195,13 @@ void MainWindow::codeset_clicked()
   if(m_flag){
       //编码设置
       MyCodeSetWidget *myCodeSetWidget = new MyCodeSetWidget();
-
       //编码设置发送
       connect(myCodeSetWidget,SIGNAL(mySignalCodeSetting(int,int)),mySocket,SLOT(sendYuanXin(int,int)));
       //传递编码设置索引
       connect(myListWidget,SIGNAL(mySignalIndex(int)),myCodeSetWidget,SLOT(getIndex(int)));
-      //判断窗口状态
+      //控制窗口同时只能打开一个界面
       connect(myCodeSetWidget,SIGNAL(mySignalFlag()),this,SLOT(updateFlag()));
+
       myCodeSetWidget->show();
 
       m_flag = false;
@@ -211,11 +219,13 @@ void MainWindow::calib_clicked()
 
       //传递校准程序索引
       connect(myListWidget,SIGNAL(mySignalIndex(int)),checkCodeWidget,SLOT(getCurrentIndex(int)));
+      //开始校准
+      connect(checkCodeWidget,SIGNAL(mySignalBegin(int)),mySocket,SLOT(sendBegin(int)));
+      //结束
+      connect(checkCodeWidget,SIGNAL(mySignalOver(int)),mySocket,SLOT(sendOver(int)));
 
-      //开始校准索引
-      connect(checkCodeWidget,SIGNAL(mySignalBegin(int)),mySocket,SLOT(sendBegin(int)));//下一个
-      connect(checkCodeWidget,SIGNAL(mySignalOver(int)),mySocket,SLOT(sendOver(int)));//结束
       connect(checkCodeWidget,SIGNAL(mySignalFlag()),this,SLOT(updateFlag()));
+
       checkCodeWidget->show();
       m_flag = false;
     }
@@ -230,7 +240,7 @@ void MainWindow::people_clicked()
       MyPeopleWidget *myPeopleWidget = new MyPeopleWidget();
 
       //分组编号
-      connect(myPeopleWidget, SIGNAL(mySignalZuHao(QString)), mySocket, SLOT(groupNumber(QString)));
+      connect(myPeopleWidget, SIGNAL(mySignalZuHao(QString)), mySocket, SLOT(sendGroupNumber(QString)));
 
       connect(myPeopleWidget,SIGNAL(mySignalFlag()),this,SLOT(updateFlag()));
 
@@ -250,17 +260,18 @@ void MainWindow::grade_clicked()
       connect(myGradeTableWidget,SIGNAL(mySignalFlag()),this,SLOT(updateFlag()));
 
       //查询数据，请求接口
-      connect(myGradeTableWidget,SIGNAL(mySignalData(int,int,QString)),mySocket,SLOT(searchData(int,int,QString)));
+      connect(myGradeTableWidget,SIGNAL(mySignalData(int,int,QString)),mySocket,SLOT(sendSearchData(int,int,QString)));
 
       //显示查询到的数据
       connect(mySocket,SIGNAL(mySignalGradeData(QJsonArray)),myGradeTableWidget,SLOT(updateGrade(QJsonArray)));
+
       myGradeTableWidget->show();
+
       m_flag = false;
     }
-
 }
 
-//更新连接状态
+//请求连接状态和电量
 void MainWindow::updateStateAndBattery()
 {
 
@@ -276,27 +287,32 @@ void MainWindow::updateStateAndBattery()
   mySocket->sendData(dataBattery );
 }
 
+
+//详细信息界面
 void MainWindow::doubleClicked(int msg)
 {
-index2 = myListWidget->getIndex() + 1;
-//  详细信息
+  index2 = msg + 1;
+  //  详细信息
   if(m_flag)
     {
       MyWidget *myWidget = new MyWidget(index2);
-      //传递详细信息界面索引
+      //单双击传递详细信息界面索引
       connect(myListWidget, SIGNAL(mySignalIndex(int)), myWidget, SLOT(getIndex(int)));
-       connect(myListWidget, SIGNAL(mySignalDoubleIndex(int)), myWidget, SLOT(getIndex(int)));
+      connect(myListWidget, SIGNAL(mySignalDoubleIndex(int)), myWidget, SLOT(getIndex(int)));
 
       //详细信息界面清除按钮
       connect(myWidget, SIGNAL(mySignalBtn()), this, SLOT(clearonly_clicked()));
 
       connect(myWidget, SIGNAL(mySignalFlag()), this, SLOT(updateFlag()));
 
+      //传递单个靶的数据
       connect(mySocket,SIGNAL(mySignalOnlyTarget(QJsonArray)),myWidget,SLOT(passHolesData(QJsonArray)));
 
+      //传递单个靶的电量数据
       connect(mySocket,SIGNAL(mySignalBatteryValue(double)),myWidget,SLOT(passBatteryData(double)));
 
       myWidget->show();
+
       m_flag = false;
     }
 }

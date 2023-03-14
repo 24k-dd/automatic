@@ -29,15 +29,17 @@ public:
 
 
 signals:
-  mySignal(QList<QPointF> msg);
   mySignalDoubleIndex(int msg);
-mySignalIndex(int msg);
+  mySignalIndex(int msg);
 
 public slots:
-  //获取数据库表1数据
+  //传递子弹数据
   void passHolesData(QJsonArray msg);
 
+  //传递电量数据
   void passBatteryData(QVector<double> msg);
+
+  void passStateData(QVector<int> vecState);
 
   //显示详细信息
   void listWidgetDoubleClicked(QListWidgetItem *item);
@@ -45,28 +47,24 @@ public slots:
   //添加选中阴影
   void listWidgeSelectionChanged(QListWidgetItem* item);
 
-public:
+private:
   double screenWidth;
   double labelXY = 801;
   double currentWidth = 1;
   double scaleBody = 1;
 
-  int targetShu = 20;
 
-  QList<int> list;
 
   OneWidget *oneWidget[20];
 
   QListWidgetItem *item[20];
 
 
-  QTimer m_Timer;
-
   int s_index = 1;//详细信息界面序号
 
-  int index2 = -1;
+  int index2 = -2;
 
-  int index3 = -2;
+  int index3 = -3;
 
 
 };

@@ -31,14 +31,14 @@ MyWidget::MyWidget(int index2,QWidget *parent) : QWidget(parent,Qt::WindowStaysO
 MyWidget::~MyWidget()
 {
 
-  delete targetSheetTwo;
-  delete myTable;
-  delete labelSum;
-  delete labelBaHao;
-  delete labelName;
-  delete clearButton;
-  delete labelBattery;
-  delete zhongDanShu;
+//  delete targetSheetTwo;
+//  delete myTable;
+//  delete labelSum;
+//  delete labelBaHao;
+//  delete labelName;
+//  delete clearButton;
+//  delete labelBattery;
+//  delete zhongDanShu;
 }
 
 void MyWidget::create()
@@ -233,8 +233,15 @@ void MyWidget::getIndex(int msg)
     {
       myTable->clear();
       labelName->setText("");
+      zhongDanShu->setText("");
+      labelSum->setText("");
+      labelBattery->setText("");
       emit mySignal(onlyHoleList);
     }
+  QStringList strList;
+  strList<<tr("弹序")<<tr("环数")<<tr("方向");
+  myTable->setHorizontalHeaderLabels(strList);
+
 
   //更新当前靶号
   labelBaHao->setText(QString::asprintf("%d",index));
@@ -243,6 +250,19 @@ void MyWidget::getIndex(int msg)
 void MyWidget::clearBtn()
 {
   emit mySignalBtn();
+
+  QList<QPointF>   onlyHoleList = {};
+
+  myTable->clear();
+  labelName->setText("");
+  zhongDanShu->setText("");
+  labelSum->setText("");
+  labelBattery->setText("");
+  emit mySignal(onlyHoleList);
+
+  QStringList strList;
+  strList<<tr("弹序")<<tr("环数")<<tr("方向");
+  myTable->setHorizontalHeaderLabels(strList);
 }
 
 

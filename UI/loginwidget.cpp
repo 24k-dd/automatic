@@ -60,8 +60,7 @@ void LoginWidget::create()
   pushButton_login->setFixedSize(280,35);
   pushButton_login->setStyleSheet("QPushButton{width: 100px;height: 100px;border: 1px solid green;font-family: 微软雅黑;border-radius: 15px;font-size: 18px;background-color: #00ffff}""QPushButton:pressed{background:white;}");
 
-  //菜单栏界面
-  mainWindow = new MainWindow();
+
 
   //输入密码
   lineEdit_username->setText("admin");
@@ -109,6 +108,8 @@ void LoginWidget::login_clicked()
 
   if(username == "admin" && password == "123456")
     {
+      //主界面
+      mainWindow = new MainWindow();
       //标志位
       flag = 0;
       mainWindow->show();

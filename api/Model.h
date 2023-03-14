@@ -13,27 +13,6 @@
 #include<QVector>
 
 using namespace std;
-//typedef struct tableOne{
-
-//  int addr;
-//  double x;
-//  double y;
-//  int cylinder_number;
-//  int direction;
-//  QString user_name;
-//  QString identification_number;
-//}TableOne;
-//Q_DECLARE_METATYPE(TableOne)
-
-//typedef struct tableTwo{
-//  int id;
-//  int addr;
-//  QString user_name;
-//  QString identification_number;
-//  int is_delete;
-//}TableTwo;
-
-//Q_DECLARE_METATYPE(TableTwo)
 
 // 控制命令接口路由值 10000-19999
 // RewriteTargetId 重写地址
@@ -76,16 +55,18 @@ const double label_scaleBody = 0.0857;
 //靶标大小
 const int label_img = 801;
 
+//0 1表示未连接 2表示校准中 3表示已连接
+const int flag_0 = 0,flag_1 = 1,flag_2 = 2,flag_3 = 3;
 
 
 
+//map转字节数组
 inline QByteArray mapToByteArry(QVariantList varList)
 {
   QJsonArray jsonArray = QJsonArray::fromVariantList(varList);
   QJsonDocument jsonDoc(jsonArray);
 
   QByteArray json = jsonDoc.toJson();
-
 
   QString str = json;
   str.replace("\n","");
@@ -123,16 +104,14 @@ inline void stopMain()
   QProcess::startDetached("taskkill -t  -f /IM " + QString("main.exe"));
 }
 
-
+//转为json格式数据
 inline QVariantList toJsonData(QString strm,int code,int addr,bool flag)
 {
 
   QVariantList varList;
-
   QVariantMap var;
   var.insert("code", code);
   QVariantMap var1;
-
   var.insert("msg", var1);
   QVariantMap var2;
 
@@ -140,33 +119,27 @@ inline QVariantList toJsonData(QString strm,int code,int addr,bool flag)
     {
       var2.insert(strm,addr);
     }
-
   var.insert("data", var2);
-
-
   varList << var;
   return varList;
 }
 
-
+//字符串转json格式数据
 inline QJsonObject QstringToJson(QString jsonString)
 {
   QJsonDocument jsonDocument = QJsonDocument::fromJson(jsonString.toLocal8Bit().data());
   if(jsonDocument.isNull())
     {
-      qDebug()<< "String NULL"<< jsonString.toLocal8Bit().data();
+//      qDebug()<< "String NULL"<< jsonString.toLocal8Bit().data();
     }
   QJsonObject jsonObject = jsonDocument.object();
   return jsonObject;
 }
 
+//json格式转字符串
 inline QString JsonToQstring(QJsonObject jsonObject)
 {
   return QString(QJsonDocument(jsonObject).toJson());
 }
-
-
-
-
 
 #endif // MODEL_H

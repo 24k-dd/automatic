@@ -23,23 +23,10 @@ MyListWidget::MyListWidget(QListWidget *parent)
   //单击选中
   connect(this,SIGNAL(itemClicked(QListWidgetItem*)),this,SLOT(listWidgeSelectionChanged(QListWidgetItem*)));
 
-  //  m_Timer.setInterval(holes_time);
-
-  //  //开启定时器
-  //  m_Timer.start();
-
-  //  //监听定时器发送的信号
-  //  connect(&m_Timer,&QTimer::timeout,[=](){
-
-
-  //    });
 }
 
 MyListWidget::~MyListWidget()
 {
-
-  //  delete [] oneWidget;
-  //  delete [] item;
 
 }
 
@@ -55,7 +42,7 @@ void MyListWidget::create()
 
 void MyListWidget::initListWidget()
 {
-  for(int i = 0; i < targetShu;i++){
+  for(int i = 0; i < array_size - 1;i++){
 
       //创建一个靶标对象
       oneWidget[i] = new OneWidget(labelXY,i);
@@ -72,9 +59,8 @@ void MyListWidget::initListWidget()
       setItemWidget(item[i],oneWidget[i]);
 
       oneWidget[i]->labelSum->setText(QString::asprintf("%1号靶 总环数:%2 中靶数:%3" ).arg(i + 1).arg(0).arg(0));
+
     }
-
-
 }
 
 int MyListWidget::getIndex()
@@ -82,6 +68,7 @@ int MyListWidget::getIndex()
   return index2;
 }
 
+//滚轮响应时间
 void MyListWidget::wheelEvent(QWheelEvent *event)
 {
   QPoint numDegrees;                                     // 定义指针类型参数numDegrees用于获取滚轮转角
@@ -103,8 +90,12 @@ void MyListWidget::wheelEvent(QWheelEvent *event)
     {
       currentWidth = currentWidth - step/20;
     }
+
+  //获取放缩比例
   scaleBody= (double)currentWidth/(double)801;
-  for(int i = 0;i < targetShu;i++)
+
+  //对每个靶标重新进行大小设置
+  for(int i = 0;i < array_size - 1;i++)
     {
 
       oneWidget[i]->setSize(currentWidth);
@@ -121,13 +112,14 @@ void MyListWidget::passHolesData(QJsonArray msg)
 {
   //总环数 中靶数
   int sum = 0,zhongBa = 0;
+  //确定数组大小
   int msgSize = msg.size();
   if(msgSize > 0)
     {
       QJsonObject s_jsonObject = msg[0].toObject();
       s_index = s_jsonObject["addr"].toInt() - 1;
     }
-  oneWidget[s_index]->onlyHoleList.clear();
+  oneWidget[s_index]->clearHoles();
   for(int i = 0;i < msgSize;i++)
     {
       QJsonObject jsonObject = msg[i].toObject();
@@ -144,51 +136,25 @@ void MyListWidget::passHolesData(QJsonArray msg)
           zhongBa++;
           sum += jsonObject["cylinder_number"].toInt();
         }
-
-      oneWidget[s_index]->onlyHoleList.append(QPointF(px,py));
-
+      oneWidget[s_index]->addHoles(QPointF(px,py));
     }
 
+  //对靶标信息进行设置
   oneWidget[s_index]->labelSum->setText(QString::asprintf("%1号靶 总环数:%2 中靶数:%3" ).arg(s_index + 1).arg(sum).arg(zhongBa));
 
+  //触发信号
   oneWidget[s_index]->getMySignal();
 
 }
 
-void MyListWidget::passBatteryData(QVector<double> msg)
+
+void MyListWidget::passStateData(QVector<int> vecState)
 {
-  for(int i = 1;i < msg.size();i++)
+  for(int i = 1;i < array_size;i++)
     {
       int s_index = i - 1;
-
-      //设置字体大小
-      if(currentWidth < 300)
+      if(vecState[i] == flag_0 || vecState[i] == flag_1)
         {
-          oneWidget[s_index]->labelSum->setStyleSheet("QLabel{font-size: 15px;background-color: #cdcdcd}");
-        }else{
-          oneWidget[s_index]->labelSum->setStyleSheet("QLabel{font-size: 23px;background-color: #cdcdcd}");
-        }
-
-      if(msg[i] >= 12.5)
-        {
-          oneWidget[s_index]->labelState->setText(QString::asprintf("已连接"));
-          //设置字体大小
-          if(currentWidth < 300)
-            {
-              oneWidget[s_index]->labelState->setStyleSheet("QLabel{font-size: 15px;background-color: #43ff19}");
-            }else{
-              oneWidget[s_index]->labelState->setStyleSheet("QLabel{font-size: 23px;background-color: #43ff19}");
-            }
-        }else if(msg[i] < 12.5 && msg[i] != 0){
-
-          oneWidget[s_index]->labelState->setText(QString::asprintf("电量过低"));
-          if(currentWidth < 300)
-            {
-              oneWidget[s_index]->labelState->setStyleSheet("QLabel{font-size: 15px;background-color: red}");
-            }else{
-              oneWidget[s_index]->labelState->setStyleSheet("QLabel{font-size: 23px;background-color: red}");
-            }
-        }else{
           oneWidget[s_index]->labelState->setText(QString::asprintf("未连接"));
 
           if(currentWidth < 300)
@@ -197,9 +163,49 @@ void MyListWidget::passBatteryData(QVector<double> msg)
             }else{
               oneWidget[s_index]->labelState->setStyleSheet("QLabel{font-size: 23px;background-color: #cdcdcd}");
             }
+        }else if(vecState[i] == flag_2)
+        {
+          oneWidget[s_index]->labelState->setText(QString::asprintf("校准中"));
+
+          if(currentWidth < 300)
+            {
+              oneWidget[s_index]->labelState->setStyleSheet("QLabel{font-size: 15px;background-color: #89fff2}");
+            }else{
+              oneWidget[s_index]->labelState->setStyleSheet("QLabel{font-size: 23px;background-color: #89fff2}");
+            }
+        }else{
+          oneWidget[s_index]->labelState->setText(QString::asprintf("已连接"));
+          //设置字体大小
+          if(currentWidth < 300)
+            {
+              oneWidget[s_index]->labelState->setStyleSheet("QLabel{font-size: 15px;background-color: #43ff19}");
+            }else{
+              oneWidget[s_index]->labelState->setStyleSheet("QLabel{font-size: 23px;background-color: #43ff19}");
+            }
         }
     }
 }
+
+ //传递电量数据
+void MyListWidget::passBatteryData(QVector<double> msg)
+{
+  for(int i = 1;i < msg.size();i++)
+    {
+      int s_index = i - 1;
+      if(msg[i] < 12.5 && msg[i] != 0){
+
+                oneWidget[s_index]->labelState->setText(QString::asprintf("电量过低"));
+                if(currentWidth < 300)
+                  {
+                    oneWidget[s_index]->labelState->setStyleSheet("QLabel{font-size: 15px;background-color: red}");
+                  }else{
+                    oneWidget[s_index]->labelState->setStyleSheet("QLabel{font-size: 23px;background-color: red}");
+                  }
+        }
+
+    }
+}
+
 
 //详细信息界面
 void MyListWidget::listWidgetDoubleClicked(QListWidgetItem *item)
@@ -215,9 +221,12 @@ void MyListWidget::listWidgeSelectionChanged(QListWidgetItem* ite)
   index3 = index2;
 
   index2 = currentRow();
+
+  //对当前选中靶标进行深度显示
   item[index2]->setBackgroundColor(QColor("#a8a8a8"));
   if(index3 > -1 && index3 < 21 && index2 != index3)
     {
+      //颜色复位
       item[index3]->setBackgroundColor(QColor(Qt::white));
     }
   emit mySignalIndex(index2);

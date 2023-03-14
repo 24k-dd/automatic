@@ -26,6 +26,11 @@ public:
   void setSize(double width);
 
   void getMySignal();
+
+  void addHoles(QPointF point);
+
+  void clearHoles();
+
 private slots:
 
 
@@ -49,9 +54,8 @@ private:
 
   int targetShu = 20;
 
-public:
   QList<QPointF>   onlyHoleList = {};
-
+public:
   QLabel *labelSum;
   QLabel *labelState;
 

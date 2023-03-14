@@ -19,7 +19,7 @@ class MyCodeSetWidget : public QWidget
 signals:
       mySignalCodeSetting(int old_addr,int new_addr); //自定义信号函数,msg参数可以省略
 
-      void mySignalFlag();
+      mySignalFlag();
 public:
   explicit MyCodeSetWidget(QWidget *parent = nullptr);
 
@@ -30,33 +30,26 @@ public:
 
 private slots:
 
+  //获取当前id
   void getIndex(int index);
 
+  //发送原新编码
   void btn1Slots();
 
 private:
 
   int flag = 1;
 
-  QLabel *label_old;
-  QLabel *label_new;
-
   QLineEdit *lineEdit;
 
   QPushButton *btn1;
 
-  QSpacerItem *h_spacer;
-
   QComboBox *comboBox;
-
-  QHBoxLayout *layout;
 
   QStringList strList;
 
 
 public:
-
-  void setPushButton_send_yuanxin(bool flag);
 
 };
 

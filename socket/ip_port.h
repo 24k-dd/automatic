@@ -16,8 +16,9 @@ public:
   ip_port();
 
   QString ip;
-  QString strPort;
   int port;
+
+  QString getIp();
 
   QString getMyIpString();
 

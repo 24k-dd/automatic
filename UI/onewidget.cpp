@@ -8,9 +8,10 @@ OneWidget::OneWidget(double size,int index,QWidget *parent) :
 
   c_index = index;
 
-
+  //改变大小
   connect(this,SIGNAL(mySignal(double)),targetSheet,SLOT(updateSize(double)));
 
+  //更新靶标数据
   connect(this,SIGNAL(mySignalHoles(QList<QPointF>)),targetSheet,SLOT(updateHoles(QList<QPointF>)));
 }
 
@@ -64,5 +65,15 @@ void OneWidget::setSize(double width)
 void OneWidget::getMySignal()
 {
   emit mySignalHoles(onlyHoleList);
+}
+
+void OneWidget::addHoles(QPointF point)
+{
+  onlyHoleList.append(point);
+}
+
+void OneWidget::clearHoles()
+{
+  onlyHoleList.clear();
 }
 

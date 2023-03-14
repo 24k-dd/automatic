@@ -7,7 +7,6 @@ MyCodeSetWidget::MyCodeSetWidget(QWidget *parent) :
   //创建布局
   create();
 
-
   connect(btn1,SIGNAL(clicked()),this,SLOT(btn1Slots()));
 }
 
@@ -24,9 +23,9 @@ void MyCodeSetWidget::create()
 
   setAttribute(Qt::WA_DeleteOnClose,false);
 
-  label_old = new QLabel("原编码:");
+  QLabel *label_old = new QLabel("原编码:");
 
-  label_new = new QLabel("新编码:");
+  QLabel *label_new = new QLabel("新编码:");
 
   lineEdit = new QLineEdit("1");
   lineEdit->setFixedSize(70,60);
@@ -53,9 +52,9 @@ void MyCodeSetWidget::create()
   btn1->setFixedSize(180,60);
 
   //弹簧
-  h_spacer = new QSpacerItem(10,10,QSizePolicy::Expanding,QSizePolicy::Minimum);
+  QSpacerItem *h_spacer = new QSpacerItem(10,10,QSizePolicy::Expanding,QSizePolicy::Minimum);
 
-  layout = new QHBoxLayout();
+  QHBoxLayout *layout = new QHBoxLayout();
 
   layout->addItem(h_spacer);
   layout->addWidget(label_old);

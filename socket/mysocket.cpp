@@ -7,11 +7,8 @@ MySocket::MySocket(QObject *parent)
     {
       vecState.push_back(0);
     }
-        QString Ip = "127.0.0.1";
-//    QString Ip = "192.168.43.191";
-//  QString Ip = "192.168.43.52";
-  int Port = 32728;
-
+  //  QString Ip = "192.168.4.2";
+  QString Ip = "127.0.0.1";
   //去掉代理
   setProxy(QNetworkProxy::NoProxy);
 
@@ -33,7 +30,11 @@ MySocket::MySocket(QObject *parent)
 
   //监听定时器发送的信号
   connect(&m_Timer,&QTimer::timeout,[=](){
+
+      //请求已连接状态的靶标信息
       updateHoles();
+
+      //      recvData();
 
     });
 
@@ -41,29 +42,61 @@ MySocket::MySocket(QObject *parent)
 
 void MySocket::sendData(QString msg)
 {
+  //发送信息
   write(msg.toUtf8().data());
-  //  qDebug()<<"send:"<<msg;
 }
 
 void MySocket::recvData()
 {
-  QByteArray recvMsg = readAll();
 
-  int index = recvMsg.indexOf('\n');
-  recvMsg.remove(index,recvMsg.size() - index);
-  QString recvStr = QString::fromUtf8(recvMsg);
 
-//  qDebug()<<"recv:"<<recvStr;
+  //   QByteArray ba = readAll();
+  //      if(ba.size() == 0)
+  //          return ;
+  //      log_Printf("recv", ba.toHex()); //十六进制打印接收到的数据
+  //      recvAllMsg.append(ba);
 
-  //构建JSON对象
+  //      int length = recvAllMsg.left(20).right(4).toHex().toInt(nullptr, 16); //从接收的数据中解读出数据的长度
+
+  //      if(length > recvAllMsg.size())
+  //          return ; //表示未完全接收
+  //      else {
+  //          ba = recvAllMsg.left(length); //将解读好的数据放入处理缓存中
+  //          recvAllMsg = recvAllMsg.right(recvAllMsg.size() - length); //删除已经解读好的数据
+  //      }
+  QByteArray recvAllMsg = read(1024);
+  int msgSize = recvAllMsg.size();
+
+  while(true)
+    {
+      if(!recvAllMsg.contains('\n'))
+        {
+          recvAllMsg += read(1024);
+        }else
+        {
+          break;
+        }
+    }
+
+  int index = recvAllMsg.indexOf('\n');
+
+  recvAllMsg.remove(index,recvAllMsg.size() - index);
+
+  qDebug()<<"接收数据大小:"<<recvAllMsg.size();
+
+  qDebug()<<"recvAllMsg:"<<recvAllMsg;
+
+  QString recvStr = QString::fromUtf8(recvAllMsg);
+
+  //  构建JSON对象
   QJsonObject json = QstringToJson(recvStr);
-  //Json转QMap
+  //  Json转QMap
   QVariantMap map = json.toVariantMap();
 
   code = map["code"].toInt();
   msg = map["msg"].toString();
 
-
+  //  确定靶标连接状态
   if(code == GetTargetState){
       for(int i = 0;i < array_size;i++)
         {
@@ -77,25 +110,26 @@ void MySocket::recvData()
           vecState[it.key().toInt()] = it.value().toInt();
           it++;
         }
+      emit mySignalState(vecState);
+    }else if(code == GetTargetInfo){//获取显示信息
+      //获取所有靶的信息
+      QJsonValue jsonValue = map["data"].toJsonValue();
 
-    }else if(code == GetShowInfo){
-            //获取所有靶的信息
-            QJsonValue jsonValue = map["data"].toJsonValue();
+      QJsonArray jsonArray = jsonValue.toArray();
+      emit mySignalUpdateHoles(jsonArray);
 
-            QJsonArray jsonArray = jsonValue.toArray();
 
-            emit mySignalUpdateHoles(jsonArray);
-            //获取单个靶的信息
-            int msgSize = jsonArray.size(),addr = -1;
-            if(msgSize > 0)
-              {
-                QJsonObject s_jsonObject = jsonArray[0].toObject();
-                addr = s_jsonObject["addr"].toInt();
-              }
-            if(s_index == addr)
-              emit mySignalOnlyTarget(jsonArray);
+      //获取单个靶的信息
+      int msgSize = jsonArray.size(),addr = -1;
+      if(msgSize > 0)
+        {
+          QJsonObject s_jsonObject = jsonArray[0].toObject();
+          addr = s_jsonObject["addr"].toInt();
+        }
+      if(s_index == addr)
+        emit mySignalOnlyTarget(jsonArray);
 
-    }else if(code == GetVoltage){
+    }else if(code == GetVoltage){//获取电量信息
       QMap<QString, QVariant> map1 = map["data"].toMap();
       QMap<QString, QVariant>::iterator it = map1.begin();
       QVector<double> vecBattery(array_size,0);
@@ -115,29 +149,16 @@ void MySocket::recvData()
       //获取所有靶的电量信息
       emit mySignalBattery(vecBattery);
 
-    }else if(code == GetTargetInfo){
+    }else if(code == GetShowInfo){//获取显示信息 用于查询信息
 
       QJsonValue jsonValue = map["data"].toJsonValue();
 
       QJsonArray jsonArray = jsonValue.toArray();
 
       emit mySignalGradeData(jsonArray);
-
-//      QList<QList<QString>> onlyHolesList;
-//      QList<QString> onlyList;
-//      for(int i = 0;i < num;i++)
-//        {
-
-//          onlyList.append(QString::number(jsonValue[i]["addr"].toInt(),10));
-
-//          onlyList.append(QString::number(jsonValue[i]["group_number"].toDouble()));
-//          onlyList.append(jsonValue[i]["user_name"].toString());
-//          onlyList.append(QString::number(jsonValue[i]["cylinder_number"].toInt(),10));
-//          onlyHolesList.append(onlyList);
-//        }
-
-//    }
-}
+    }
+  recvAllMsg.clear();
+  //    }
 }
 
 void MySocket::closeSocket()
@@ -145,20 +166,38 @@ void MySocket::closeSocket()
   close();
 }
 
-//请求靶标信息
+//请求已连接靶标信息
 void MySocket::updateHoles()
 {
   for(int i = 1;i < array_size;i++)
     {
-      if(vecState[i] != 0)
+      if(vecState[i] == flag_3)
         {
-            sendHoles(vecState[i]);
+          sendHoles(i);
         }
     }
 }
 
+//bool MySocket::readMessage()
+//{
+//  while(!recvAllMsg.contains('\n'))
+//    {
+//      recvAllMsg += readAll();
+//      if(recvAllMsg.contains('\n'))
+//        {
+//          int index = recvAllMsg.indexOf('\n');
+//          recvAllMsg.remove(index,recvAllMsg.size() - index);
+//           qDebug()<<"recvAllMsg:"<<recvAllMsg;
+//          return true;
+//        }
+//    }
+//  return false;
+
+
+//}
+
 //分组控制信息
-void MySocket::groupNumber(QString indexZuHao)
+void MySocket::sendGroupNumber(QString indexZuHao)
 {
   group_number = indexZuHao.toInt();
   QVariantList varList = toJsonData("group_number",UserGrouping,group_number,true);
@@ -171,6 +210,7 @@ void MySocket::groupNumber(QString indexZuHao)
 
 }
 
+//更改编号控制信息
 void MySocket::sendYuanXin(int old_addr, int new_addr)
 {
   QVariantList varList;
@@ -191,11 +231,12 @@ void MySocket::sendYuanXin(int old_addr, int new_addr)
 
   QByteArray data = mapToByteArry(varList);
 
- sendData(data);
+  sendData(data);
 
- qDebug()<<"编码设置指令已发送:"<<data;
+  qDebug()<<"编码设置指令已发送:"<<data;
 }
 
+//开始校准控制信息
 void MySocket::sendBegin(int flag)
 {
   QVariantList varList = toJsonData("addr",OpenCalibrationTargetById,flag,true);
@@ -207,6 +248,7 @@ void MySocket::sendBegin(int flag)
   qDebug()<<"开始校准指令已发送:"<<data;
 }
 
+//结束校准控制信息
 void MySocket::sendOver(int flag)
 {
   QVariantList varList = toJsonData("addr",CloseCalibrationTargetById,flag,true);
@@ -218,12 +260,13 @@ void MySocket::sendOver(int flag)
   qDebug()<<"结束指令已发送:"<<data;
 }
 
-void MySocket::searchData(int fenZu, int baHao, QString time)
+//查询数据
+void MySocket::sendSearchData(int fenZu, int baHao, QString time)
 {
   QVariantList varList;
 
   QVariantMap var;
-  var.insert("code", GetTargetInfo);
+  var.insert("code", GetShowInfo);
   QVariantMap var1;
   var1.insert("date",time);
 
@@ -244,12 +287,13 @@ void MySocket::searchData(int fenZu, int baHao, QString time)
   qDebug()<<"编码设置指令已发送:"<<data;
 }
 
+//请求靶号
 void MySocket::sendHoles(int msg)
 {
   QVariantList varList;
 
   QVariantMap var;
-  var.insert("code", GetShowInfo);
+  var.insert("code", GetTargetInfo);
   QVariantMap var1;
 
   QDate m_date = QDate::currentDate();
@@ -260,6 +304,7 @@ void MySocket::sendHoles(int msg)
   QVariantMap var2;
 
   var2.insert("addr",msg);
+  //  qDebug()<<"addr:"<<msg;
   var2.insert("group_number",group_number);
 
   var.insert("data", var2);
@@ -271,6 +316,7 @@ void MySocket::sendHoles(int msg)
   sendData(data);
 }
 
+//更新当前所选中的靶标
 void MySocket::updateIndex(int msg)
 {
   s_index = msg + 1;

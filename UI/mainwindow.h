@@ -57,7 +57,7 @@ public:
   void updateStateAndBattery();
 
 signals:
-  void mySignal(int msg); //自定义信号函数,msg参数可以省略
+
 
 private slots:
   void clearall_clicked();
@@ -74,6 +74,7 @@ private slots:
 
   void close_clicked();
 
+  //双击打开详细界面
   void doubleClicked(int msg);
 
   //只允许同时打开一个界面
@@ -85,32 +86,26 @@ private:
 
   MyListWidget *myListWidget = NULL;
 
-  int index2 = -1;
-
-  int index3 = -2;
-
-public:
-  //屏幕宽度
-  double nWidth;
-
-  double nHeight;
-
-public:
-  QListWidget *listWidget = NULL;
   QToolBar *toolBar = NULL;
+
   QToolButton *act[6];
 
+  MyWidget *myWidget = NULL;
 
-  QVector<int> vecState;
+  //记录当前id 与上次id 用于复位
+  int index2 = -1;
+  int index3 = -2;
 
-  int group_number = -1;
+  //屏幕宽度
+  double nWidth;
+  double nHeight;
 
-public:
+  //只允许同时打开一个界面
   bool m_flag = true;
 
   QTimer m_Timer;
 
-public slots:
+
 
 
 };

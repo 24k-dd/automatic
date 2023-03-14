@@ -24,11 +24,7 @@
 class MyWidget : public QWidget
 {
   Q_OBJECT
-signals:
-  mySignalBtn();
-  mySignalFlag();
 
-  mySignal(QList<QPointF> msg);
 public:
   explicit MyWidget(int index2,QWidget *parent = nullptr);
   ~MyWidget();
@@ -38,7 +34,11 @@ public:
 
   void closeEvent(QCloseEvent *event);
 
+signals:
+  mySignalBtn();
+  mySignalFlag();
 
+  mySignal(QList<QPointF> msg);
 public slots:
 
   void getIndex(int msg);
@@ -74,11 +74,6 @@ private:
   int index = 4,s_index = 0;
 
   QString user_name = "";
-
-  bool flag = true;
-
-  int current_cnt1 = 0;
-  int current_cnt2 = 0;
 
 };
 
