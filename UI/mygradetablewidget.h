@@ -33,17 +33,15 @@ public:
   explicit MyGradeTableWidget(QWidget *parent = nullptr);
   ~MyGradeTableWidget();
 
-  void addData();
+
 
   void closeEvent(QCloseEvent *event);
 
   void create();
-//  void checkGrade(QVector<int> numVec,QVector<QString> nameVec,int baHao,int fenZu);
+
 
 public slots:
-  //    void updateGrade(QList<QList<int>> msg);
 
-//  void updateLastDate();
 
 signals:
   void mySignalFlag();

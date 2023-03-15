@@ -16,10 +16,7 @@ class MyCodeSetWidget : public QWidget
 {
   Q_OBJECT
 
-signals:
-      mySignalCodeSetting(int old_addr,int new_addr); //自定义信号函数,msg参数可以省略
 
-      mySignalFlag();
 public:
   explicit MyCodeSetWidget(QWidget *parent = nullptr);
 
@@ -27,7 +24,10 @@ public:
 
       void create();
 
+signals:
+      mySignalCodeSetting(int old_addr,int new_addr); //自定义信号函数,msg参数可以省略
 
+      mySignalFlag();
 private slots:
 
   //获取当前id

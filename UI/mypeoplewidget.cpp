@@ -94,9 +94,9 @@ void MyPeopleWidget::create()
   lineEdit->setFont(QFont(QString::asprintf("Cambria Math"), 18, QFont::Black));
 
   //弹簧
-  h_spacer = new QSpacerItem(10,10,QSizePolicy::Expanding,QSizePolicy::Minimum);
+  QSpacerItem *h_spacer = new QSpacerItem(10,10,QSizePolicy::Expanding,QSizePolicy::Minimum);
 
-  layout = new QHBoxLayout();
+  QHBoxLayout *layout = new QHBoxLayout();
   layout->addWidget(tip);
   layout->addItem(h_spacer);
   layout->addWidget(lineEditTip);

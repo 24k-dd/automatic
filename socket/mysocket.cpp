@@ -7,8 +7,10 @@ MySocket::MySocket(QObject *parent)
     {
       vecState.push_back(0);
     }
-  //  QString Ip = "192.168.4.2";
+  //    QString Ip = "192.168.4.2";
+
   QString Ip = "127.0.0.1";
+  //  QString Ip = "192.168.43.52";
   //去掉代理
   setProxy(QNetworkProxy::NoProxy);
 
@@ -21,7 +23,8 @@ MySocket::MySocket(QObject *parent)
       qDebug() << "connect failed";
     }
 
-  connect(this, &QTcpSocket::readyRead,this,&MySocket::recvData);
+  connect(this, &QTcpSocket::readyRead,this,&MySocket::readMessage);
+
 
   m_Timer.setInterval(holes_time);
 
@@ -49,42 +52,13 @@ void MySocket::sendData(QString msg)
 void MySocket::recvData()
 {
 
-
-  //   QByteArray ba = readAll();
-  //      if(ba.size() == 0)
-  //          return ;
-  //      log_Printf("recv", ba.toHex()); //十六进制打印接收到的数据
-  //      recvAllMsg.append(ba);
-
-  //      int length = recvAllMsg.left(20).right(4).toHex().toInt(nullptr, 16); //从接收的数据中解读出数据的长度
-
-  //      if(length > recvAllMsg.size())
-  //          return ; //表示未完全接收
-  //      else {
-  //          ba = recvAllMsg.left(length); //将解读好的数据放入处理缓存中
-  //          recvAllMsg = recvAllMsg.right(recvAllMsg.size() - length); //删除已经解读好的数据
-  //      }
-  QByteArray recvAllMsg = read(1024);
-  int msgSize = recvAllMsg.size();
-
-  while(true)
-    {
-      if(!recvAllMsg.contains('\n'))
-        {
-          recvAllMsg += read(1024);
-        }else
-        {
-          break;
-        }
-    }
-
   int index = recvAllMsg.indexOf('\n');
 
   recvAllMsg.remove(index,recvAllMsg.size() - index);
 
-  qDebug()<<"接收数据大小:"<<recvAllMsg.size();
+//  qDebug()<<"接收数据大小:"<<recvAllMsg.size();
 
-  qDebug()<<"recvAllMsg:"<<recvAllMsg;
+//  qDebug()<<"recvAllMsg:"<<recvAllMsg;
 
   QString recvStr = QString::fromUtf8(recvAllMsg);
 
@@ -127,7 +101,10 @@ void MySocket::recvData()
           addr = s_jsonObject["addr"].toInt();
         }
       if(s_index == addr)
-        emit mySignalOnlyTarget(jsonArray);
+        {
+          emit mySignalOnlyTarget(jsonArray);
+
+        }
 
     }else if(code == GetVoltage){//获取电量信息
       QMap<QString, QVariant> map1 = map["data"].toMap();
@@ -157,8 +134,8 @@ void MySocket::recvData()
 
       emit mySignalGradeData(jsonArray);
     }
-  recvAllMsg.clear();
-  //    }
+
+
 }
 
 void MySocket::closeSocket()
@@ -169,32 +146,34 @@ void MySocket::closeSocket()
 //请求已连接靶标信息
 void MySocket::updateHoles()
 {
-  for(int i = 1;i < array_size;i++)
-    {
-      if(vecState[i] == flag_3)
-        {
-          sendHoles(i);
-        }
-    }
+    for(int i = 1;i < array_size;i++)
+      {
+        if(vecState[i] == flag_3)
+          {
+            sendHoles(i);
+          }
+      }
+//  sendHoles(3);
 }
 
-//bool MySocket::readMessage()
-//{
-//  while(!recvAllMsg.contains('\n'))
-//    {
-//      recvAllMsg += readAll();
-//      if(recvAllMsg.contains('\n'))
-//        {
-//          int index = recvAllMsg.indexOf('\n');
-//          recvAllMsg.remove(index,recvAllMsg.size() - index);
-//           qDebug()<<"recvAllMsg:"<<recvAllMsg;
-//          return true;
-//        }
-//    }
-//  return false;
+bool MySocket::readMessage()
+{
+  while(true)
+    {
+      QByteArray temp = read(1);
 
+      recvAllMsg.append(temp);
 
-//}
+      if(temp.contains('\n'))
+        {
+          recvData();
+          recvAllMsg.clear();
+          return true;
+        }
+    }
+
+}
+
 
 //分组控制信息
 void MySocket::sendGroupNumber(QString indexZuHao)
@@ -316,11 +295,35 @@ void MySocket::sendHoles(int msg)
   sendData(data);
 }
 
+QString MySocket::getMyIpString()
+{
+    QString ip_address;
+    QList<QHostAddress> ipAddressesList = QNetworkInterface::allAddresses(); // 获取所有ip
+    for (int i = 0; i < ipAddressesList.size(); ++i)
+    {
+
+        QHostAddress ipAddr = ipAddressesList.at(i);
+        if ((ipAddr.protocol() == QAbstractSocket::IPv4Protocol))// 筛选出ipv4
+        {
+
+            if (!ipAddr.toString().startsWith("169"))// 过滤掉网卡，路由器等的ip
+            {
+                ip_address = ipAddr.toString();
+                break;
+            }
+        }
+    }
+    if (ip_address.isEmpty())
+        ip_address = QHostAddress(QHostAddress::LocalHost).toString();
+    return ip_address;
+}
+
 //更新当前所选中的靶标
 void MySocket::updateIndex(int msg)
 {
   s_index = msg + 1;
 }
+
 
 
 

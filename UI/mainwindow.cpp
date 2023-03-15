@@ -271,21 +271,6 @@ void MainWindow::grade_clicked()
     }
 }
 
-//请求连接状态和电量
-void MainWindow::updateStateAndBattery()
-{
-
-  QVariantList varListState = toJsonData("addr",GetTargetState,-1,false);
-
-  QByteArray dataState = mapToByteArry(varListState);
-
-  mySocket->sendData(dataState);
-
-  QVariantList varListBattery = toJsonData("addr",GetVoltage,-1,false);
-  QByteArray dataBattery  = mapToByteArry(varListBattery);
-
-  mySocket->sendData(dataBattery );
-}
 
 
 //详细信息界面
@@ -316,6 +301,23 @@ void MainWindow::doubleClicked(int msg)
       m_flag = false;
     }
 }
+
+//请求连接状态和电量
+void MainWindow::updateStateAndBattery()
+{
+
+  QVariantList varListState = toJsonData("addr",GetTargetState,-1,false);
+
+  QByteArray dataState = mapToByteArry(varListState);
+
+  mySocket->sendData(dataState);
+
+  QVariantList varListBattery = toJsonData("addr",GetVoltage,-1,false);
+  QByteArray dataBattery  = mapToByteArry(varListBattery);
+
+  mySocket->sendData(dataBattery );
+}
+
 
 //判断窗口是否打开
 void MainWindow::updateFlag()

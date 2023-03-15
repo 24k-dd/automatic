@@ -56,9 +56,6 @@ public:
   //请求连接状态和电量
   void updateStateAndBattery();
 
-signals:
-
-
 private slots:
   void clearall_clicked();
 
@@ -90,7 +87,7 @@ private:
 
   QToolButton *act[6];
 
-  MyWidget *myWidget = NULL;
+//  MyWidget *myWidget = NULL;
 
   //记录当前id 与上次id 用于复位
   int index2 = -1;

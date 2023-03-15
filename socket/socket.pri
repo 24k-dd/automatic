@@ -37,12 +37,9 @@
 #    $$PWD/ip_port.cpp \
 #    $$PWD/mysocket.cpp
 
-HEADERS += $$PWD/ip_port.h \
-    $$PWD/mysocket.h
+HEADERS += $$PWD/mysocket.h
 
-SOURCES += $$PWD/ip_port.cpp \
-    $$PWD/mysocket.cpp
-
+SOURCES += $$PWD/mysocket.cpp
 
 
 

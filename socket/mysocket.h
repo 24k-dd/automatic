@@ -15,10 +15,11 @@
 #include<QVector>
 #include<QTimer>
 #include<QDate>
+#include<QNetworkInterface>
 
 
 #include"Model.h"
-#include"ip_port.h"
+//#include"ip_port.h"
 
 class MySocket : public QTcpSocket
 {
@@ -30,16 +31,16 @@ public:
   //发m送数据
   void sendData(QString msg);
 
-  //接收数据
-  void recvData();
-
   //关闭通信
   void closeSocket();
 
   //更新已连接靶标数据
   void updateHoles();
 
-//  bool readMessage();
+  //请求已连接靶的数据
+  void sendHoles(int msg);
+
+    QString getMyIpString();
 
 signals:
 
@@ -77,17 +78,17 @@ public slots:
   //成绩导出 查询成绩控制信息
   void sendSearchData(int fenZu,int baHao,QString time);
 
-  //请求已连接靶的数据
-  void sendHoles(int msg);
-
   //更新当前双击 单击 靶标的id
   void updateIndex(int msg);
 
-private:
-  ip_port ipPort;
+  //接收数据
+  void recvData();
 
-//    QString Ip = ipPort.ip;
-    int Port = ipPort.port;
+  //读取数据
+  bool readMessage();
+
+private:
+int Port = 32728;
 
   QTimer m_Timer;
 
@@ -108,6 +109,9 @@ private:
 
   //电量数据
   double batteryValue = 0;
+
+    QByteArray recvAllMsg = "";
+
 };
 
 #endif // MYSOCKET_H

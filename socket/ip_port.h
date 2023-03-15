@@ -18,8 +18,6 @@ public:
   QString ip;
   int port;
 
-  QString getIp();
-
   QString getMyIpString();
 
 };

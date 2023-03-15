@@ -20,15 +20,15 @@ class MyPeopleWidget : public QWidget
 public:
   explicit MyPeopleWidget(QWidget *parent = nullptr);
 
-      void closeEvent(QCloseEvent *event);
-         void readText();
-                  void writeText();
+  void closeEvent(QCloseEvent *event);
+  void readText();
+  void writeText();
 
-                  void create();
+  void create();
 signals:
-    void mySignalZuHao(QString msg); //自定义信号函数,msg参数可以省略
+  void mySignalZuHao(QString msg); //自定义信号函数,msg参数可以省略
 
-          void mySignalFlag();
+  void mySignalFlag();
 
 
 private slots:
@@ -37,19 +37,13 @@ private slots:
 private:
   QPushButton *btn;
   QLineEdit *lineEdit;
-    QLineEdit *lineEditTip;
-  QHBoxLayout *layout;
-  QSpacerItem *h_spacer;
+  QLineEdit *lineEditTip;
   QString zuhao;
 
   QFile file;
 
   QDate m_date;
   QString currentDate;
-
-  int flag = 1;
-
-
 };
 
 
