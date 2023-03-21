@@ -46,7 +46,7 @@ void MyWidget::create()
   //主界面外观设置
   this->resize(1200,840);
   this->setWindowTitle("靶标显示系统");
-  this->setWindowIcon(QIcon(":/Img/app-icon.gif"));
+  this->setWindowIcon(QIcon(":/source/app-icon.gif"));
   this->setFixedSize(this->width(),this->height());
 
   QWidget *widget = new QWidget(this);
@@ -161,24 +161,24 @@ void MyWidget::closeEvent(QCloseEvent *event)
 }
 
 //更新子弹列表
-void MyWidget::passHolesData(QJsonArray msg)
+void MyWidget::passHolesData(const QVector<Target_Info_Table> &data)
 {
   int sum = 0,zhongBa = 0;
-  int msgSize = msg.size();
+  int msgSize = data.size();
   QList<QPointF>   onlyHoleList = {};
 
   myTable->clearContents();
   for(int i = 0;i < msgSize;i++)
     {
-      QJsonObject jsonObject = msg[i].toObject();
-      s_index = jsonObject["addr"].toInt();
 
-      user_name = jsonObject["user_name"].toString();
+      s_index = data[i].addr;
+
+      user_name = data[i].user_name;
       labelName->setText(user_name);
 
-      onlyHoleList.append(QPointF(jsonObject["x"].toDouble(),801 - jsonObject["y"].toDouble()));
+      onlyHoleList.append(QPointF(data[i].x,801 - data[i].y));
 
-      sum += jsonObject["cylinder_number"].toInt();
+      sum += data[i].cylinder_number;
       QTableWidgetItem *danXu = new QTableWidgetItem(QString::asprintf("%d",i + 1));
       danXu->setTextAlignment(Qt::AlignCenter);
       danXu->setFont(QFont(QString::asprintf("Cambria Math"), 16, QFont::Black));
@@ -191,15 +191,15 @@ void MyWidget::passHolesData(QJsonArray msg)
       direction->setTextAlignment(Qt::AlignCenter);
       direction->setFont(QFont(QString::asprintf("Cambria Math"), 16, QFont::Black));
 
-      if(jsonObject["direction"].toInt() == -1)
+      if(data[i].direction == -1)
         {
           danXu->setForeground(QColor(Qt::red));
           huanShu->setText(QString::asprintf("脱靶"));
           huanShu->setForeground(QColor(Qt::red));
           direction->setText(QString::asprintf(""));
         }else{
-          huanShu->setText(QString::asprintf("%d",jsonObject["cylinder_number"].toInt()));
-          direction->setText(QString::asprintf("%d",jsonObject["direction"].toInt()));
+          huanShu->setText(QString::asprintf("%d",data[i].cylinder_number));
+          direction->setText(QString::asprintf("%d",data[i].direction));
           zhongBa++;
         }
       myTable->setItem(i,0,danXu);

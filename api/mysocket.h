@@ -19,7 +19,7 @@
 
 
 #include"Model.h"
-//#include"ip_port.h"
+#include"api.h"
 
 class MySocket : public QTcpSocket
 {
@@ -45,10 +45,10 @@ public:
 signals:
 
   //传递所有靶的数据
-  mySignalUpdateHoles(QJsonArray jsonArry);
+  mySignalUpdateHoles(const QVector<Target_Info_Table> &data);
 
   //传递单个靶的数据
-  mySignalOnlyTarget(QJsonArray jsonArry);
+  mySignalOnlyTarget(const QVector<Target_Info_Table> &data);
 
   //传递所有靶的电量数据
   mySignalBattery(QVector<double> msg);
@@ -57,7 +57,7 @@ signals:
   mySignalBatteryValue(double msg);
 
   //传递所有靶的数据 用于成绩查询
-  mySignalGradeData(QJsonArray jsonArry);
+  mySignalGradeData(const QVector<Check_Target_Table> &data);
 
   mySignalState(QVector<int> vec);
 
@@ -85,7 +85,7 @@ public slots:
   void recvData();
 
   //读取数据
-  bool readMessage();
+  void readMessage();
 
 private:
 int Port = 32728;
@@ -110,7 +110,8 @@ int Port = 32728;
   //电量数据
   double batteryValue = 0;
 
-    QByteArray recvAllMsg = "";
+  QByteArray recvAllMsg = "";
+
 
 };
 

@@ -1,7 +1,4 @@
-#QT       += core gui network
-#QT += sql \
-#    widgets
-
+#QT       += core gui
 
 #greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -20,10 +17,10 @@
 
 ##SOURCES += \
 ##    main.cpp \
-##    sqlitetools.cpp
+##    widget.cpp
 
-#HEADERS += \
-#    sqlitetools.h
+##HEADERS += \
+##    widget.h
 
 ## Default rules for deployment.
 #qnx: target.path = /tmp/$${TARGET}/bin
@@ -31,18 +28,19 @@
 #!isEmpty(target.path): INSTALLS += target
 
 #HEADERS += \
-#    $$PWD/sqlitetools.h \
-#    $$PWD/sqlitethread.h \
-#    $$PWD/Model.h
+#    $$PWD/ip_port.h \
+#    $$PWD/mysocket.h
+
 
 
 #SOURCES += \
-#    $$PWD/sqlitetools.cpp \
-#    $$PWD/sqlitethread.cpp
+#    $$PWD/ip_port.cpp \
+#    $$PWD/mysocket.cpp
 
+HEADERS += $$PWD/mysocket.h \
+    $$PWD/api.h
 
-HEADERS += $$PWD/Model.h
-
+SOURCES += $$PWD/mysocket.cpp
 
 
 

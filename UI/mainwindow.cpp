@@ -4,6 +4,8 @@
 MainWindow::MainWindow(QWidget *parent) :
   QWidget(parent)
 {
+  //注册传递信息
+  qRegisterMetaType<QVector<Target_Info_Table>>("QVector<Target_Info_Table>");
   //运行主程序
   runMain();
 
@@ -14,31 +16,8 @@ MainWindow::MainWindow(QWidget *parent) :
   //创建布局
   create();
 
-
-  //双击打开详细界面
-  connect(myListWidget,SIGNAL(mySignalDoubleIndex(int)),this,SLOT(doubleClicked(int)));
-
-  //单 双击 更新通信里的id
-  connect(myListWidget,SIGNAL(mySignalDoubleIndex(int)),mySocket,SLOT(updateIndex(int)));
-  connect(myListWidget, SIGNAL(mySignalIndex(int)), mySocket, SLOT(updateIndex(int)));
-
-  //更新所有靶标
-  connect(mySocket,SIGNAL(mySignalUpdateHoles(QJsonArray)),myListWidget,SLOT(passHolesData(QJsonArray)));
-
-  //更新所有靶标电量
-  connect(mySocket,SIGNAL(mySignalBattery(QVector<double>)),myListWidget,SLOT(passBatteryData(QVector<double>)));
-
-  //更新所有靶标状态
-  connect(mySocket,SIGNAL(mySignalState(QVector<int>)),myListWidget,SLOT(passStateData(QVector<int>)));
-
-  //进行信号槽关联
-  connect(act[0],SIGNAL(clicked()),this,SLOT(clearall_clicked()));
-  connect(act[1],SIGNAL(clicked()),this,SLOT(clearonly_clicked()));
-  connect(act[2],SIGNAL(clicked()),this,SLOT(codeset_clicked()));
-  connect(act[3],SIGNAL(clicked()),this,SLOT(calib_clicked()));
-  connect(act[4],SIGNAL(clicked()),this,SLOT(people_clicked()));
-  connect(act[5],SIGNAL(clicked()),this,SLOT(grade_clicked()));
-  connect(act[6],SIGNAL(clicked()),this,SLOT(close_clicked()));
+  //初始化信号和槽
+  initConnect();
 
   updateStateAndBattery();
 
@@ -60,7 +39,7 @@ MainWindow::MainWindow(QWidget *parent) :
 void MainWindow::create()
 {
   setWindowTitle("标靶显示系统");
-  setWindowIcon(QIcon(":/Img/app-icon.gif"));
+  setWindowIcon(QIcon(":/source/app-icon.gif"));
   //最大化
   setWindowState(Qt::WindowMaximized);
   //清除缓存
@@ -136,6 +115,34 @@ void MainWindow::create()
   setLayout(v_layout);
 }
 
+void MainWindow::initConnect()
+{
+  //双击打开详细界面
+  connect(myListWidget,SIGNAL(mySignalDoubleIndex(int)),this,SLOT(doubleClicked(int)));
+
+  //单 双击 更新通信里的id
+  connect(myListWidget,SIGNAL(mySignalDoubleIndex(int)),mySocket,SLOT(updateIndex(int)));
+  connect(myListWidget, SIGNAL(mySignalIndex(int)), mySocket, SLOT(updateIndex(int)));
+
+  //更新所有靶标
+  connect(mySocket,SIGNAL(mySignalUpdateHoles(const QVector<Target_Info_Table>)),myListWidget,SLOT(passHolesData(const QVector<Target_Info_Table>)));
+
+  //更新所有靶标电量
+  connect(mySocket,SIGNAL(mySignalBattery(QVector<double>)),myListWidget,SLOT(passBatteryData(QVector<double>)));
+
+  //更新所有靶标状态
+  connect(mySocket,SIGNAL(mySignalState(QVector<int>)),myListWidget,SLOT(passStateData(QVector<int>)));
+
+  //进行信号槽关联
+  connect(act[0],SIGNAL(clicked()),this,SLOT(clearall_clicked()));
+  connect(act[1],SIGNAL(clicked()),this,SLOT(clearonly_clicked()));
+  connect(act[2],SIGNAL(clicked()),this,SLOT(codeset_clicked()));
+  connect(act[3],SIGNAL(clicked()),this,SLOT(calib_clicked()));
+  connect(act[4],SIGNAL(clicked()),this,SLOT(people_clicked()));
+  connect(act[5],SIGNAL(clicked()),this,SLOT(grade_clicked()));
+  connect(act[6],SIGNAL(clicked()),this,SLOT(close_clicked()));
+}
+
 MainWindow::~MainWindow()
 {
 
@@ -159,10 +166,11 @@ void MainWindow::close_clicked()
 //全部清空
 void MainWindow::clearall_clicked()
 {
+  Send_Info sendDataInfo;
+  sendDataInfo.code = ClearTarget;
+  sendDataInfo.data.insert("addr",-1);
 
-  QVariantList varList = toJsonData("addr",ClearTarget,-1,true);
-
-  QByteArray data = mapToByteArry(varList);
+  QByteArray data = structToJson(sendDataInfo);
 
   mySocket->sendData(data);
 
@@ -178,13 +186,14 @@ void MainWindow::clearonly_clicked()
     {
       QMessageBox::information(this,tr("提示"),tr("请选中靶标!"),QMessageBox::Ok);
     }else{
+      Send_Info sendDataInfo;
+      sendDataInfo.code = ClearTarget;
+      sendDataInfo.data.insert("addr",index2);
 
-      QVariantList varList = toJsonData("addr",ClearTarget,index2,true);
-      QByteArray data = mapToByteArry(varList);
+      QByteArray data = structToJson(sendDataInfo);
 
-      mySocket->sendData(data);
+      qDebug()<<"主界面单个清除指令已发送:"<<data;
 
-      qDebug()<<"主界面单个清除指令已发送:"<<index2<<data;
     }
 }
 
@@ -256,6 +265,7 @@ void MainWindow::grade_clicked()
     {
       //成绩导出
       MyGradeTableWidget *myGradeTableWidget = new MyGradeTableWidget();
+      qRegisterMetaType<QVector<Check_Target_Table>>("QVector<Check_Target_Table>");
 
       connect(myGradeTableWidget,SIGNAL(mySignalFlag()),this,SLOT(updateFlag()));
 
@@ -263,7 +273,7 @@ void MainWindow::grade_clicked()
       connect(myGradeTableWidget,SIGNAL(mySignalData(int,int,QString)),mySocket,SLOT(sendSearchData(int,int,QString)));
 
       //显示查询到的数据
-      connect(mySocket,SIGNAL(mySignalGradeData(QJsonArray)),myGradeTableWidget,SLOT(updateGrade(QJsonArray)));
+      connect(mySocket,SIGNAL(mySignalGradeData(const QVector<Check_Target_Table>)),myGradeTableWidget,SLOT(updateGrade(const QVector<Check_Target_Table>)));
 
       myGradeTableWidget->show();
 
@@ -281,6 +291,8 @@ void MainWindow::doubleClicked(int msg)
   if(m_flag)
     {
       MyWidget *myWidget = new MyWidget(index2);
+
+
       //单双击传递详细信息界面索引
       connect(myListWidget, SIGNAL(mySignalIndex(int)), myWidget, SLOT(getIndex(int)));
       connect(myListWidget, SIGNAL(mySignalDoubleIndex(int)), myWidget, SLOT(getIndex(int)));
@@ -291,7 +303,7 @@ void MainWindow::doubleClicked(int msg)
       connect(myWidget, SIGNAL(mySignalFlag()), this, SLOT(updateFlag()));
 
       //传递单个靶的数据
-      connect(mySocket,SIGNAL(mySignalOnlyTarget(QJsonArray)),myWidget,SLOT(passHolesData(QJsonArray)));
+      connect(mySocket,SIGNAL(mySignalOnlyTarget(const QVector<Target_Info_Table>)),myWidget,SLOT(passHolesData(const QVector<Target_Info_Table>)));
 
       //传递单个靶的电量数据
       connect(mySocket,SIGNAL(mySignalBatteryValue(double)),myWidget,SLOT(passBatteryData(double)));
@@ -305,15 +317,15 @@ void MainWindow::doubleClicked(int msg)
 //请求连接状态和电量
 void MainWindow::updateStateAndBattery()
 {
+  Send_Info sendDataInfo;
+  sendDataInfo.code = GetTargetState;
 
-  QVariantList varListState = toJsonData("addr",GetTargetState,-1,false);
-
-  QByteArray dataState = mapToByteArry(varListState);
+  QByteArray dataState = structToJson(sendDataInfo);
 
   mySocket->sendData(dataState);
 
-  QVariantList varListBattery = toJsonData("addr",GetVoltage,-1,false);
-  QByteArray dataBattery  = mapToByteArry(varListBattery);
+  sendDataInfo.code = GetVoltage;
+  QByteArray dataBattery  = structToJson(sendDataInfo);
 
   mySocket->sendData(dataBattery );
 }

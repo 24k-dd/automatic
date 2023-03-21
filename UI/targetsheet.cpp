@@ -31,7 +31,7 @@ void TargetSheet::create()
 
 
   //加载背景
-  backgroundImage.load(":/Img/circle-print.gif");
+  backgroundImage.load(":/source/circle-print.gif");
   this->setPixmap(QPixmap::fromImage(backgroundImage));
 
   //弹孔列表初始化
@@ -39,7 +39,7 @@ void TargetSheet::create()
   onlyHoleList = {};
 
   //加载弹孔图片，并求取弹孔中心坐标
-  bulletImage = QPixmap(":/Img/bulletHole.png").scaled(12,12);
+  bulletImage = QPixmap(":/source/bulletHole.png").scaled(12,12);
   bulletCenter = QPointF(bulletImage.size().width()/2.0, bulletImage.size().height()/2.0);
 }
 
@@ -70,6 +70,6 @@ void TargetSheet::updateHoles(QList<QPointF> msg)
 void TargetSheet::updateSize(double size)
 {
   //加载弹孔图片，并求取弹孔中心坐标
-  bulletImage = QPixmap(":/Img/bulletHole.png").scaled(24 * size,24 * size);
+  bulletImage = QPixmap(":/source/bulletHole.png").scaled(24 * size,24 * size);
   bulletCenter = QPointF(bulletImage.size().width()/2.0, bulletImage.size().height()/2.0);
 }

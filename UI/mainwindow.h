@@ -36,7 +36,7 @@
 #include<windows.h>
 #include<tlhelp32.h>
 #include<comdef.h>
-#include"socket/mysocket.h"
+#include"api/mysocket.h"
 #include "mycodesetwidget.h"
 #include "checkcodewidget.h"
 #include "mypeoplewidget.h"
@@ -53,8 +53,12 @@ public:
 
   void create();
 
+  void initConnect();
+
   //请求连接状态和电量
   void updateStateAndBattery();
+
+
 
 private slots:
   void clearall_clicked();

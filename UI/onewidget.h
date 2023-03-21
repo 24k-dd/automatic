@@ -10,7 +10,7 @@
 
 
 #include"targetsheet.h"
-#include"Model.h"
+#include"model/Model.h"
 
 class OneWidget :public QWidget
 {

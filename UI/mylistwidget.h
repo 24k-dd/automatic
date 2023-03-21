@@ -34,7 +34,7 @@ signals:
 
 public slots:
   //传递子弹数据
-  void passHolesData(QJsonArray msg);
+  void passHolesData(const QVector<Target_Info_Table> &data);
 
   //传递电量数据
   void passBatteryData(QVector<double> msg);

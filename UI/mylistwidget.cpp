@@ -108,33 +108,32 @@ void MyListWidget::wheelEvent(QWheelEvent *event)
 }
 
 //传递子弹数据
-void MyListWidget::passHolesData(QJsonArray msg)
+void MyListWidget::passHolesData(const QVector<Target_Info_Table> &data)
 {
   //总环数 中靶数
   int sum = 0,zhongBa = 0;
   //确定数组大小
-  int msgSize = msg.size();
+  int msgSize = data.size();
   if(msgSize > 0)
     {
-      QJsonObject s_jsonObject = msg[0].toObject();
-      s_index = s_jsonObject["addr"].toInt() - 1;
+      s_index = data[0].addr - 1;
     }
   oneWidget[s_index]->clearHoles();
   for(int i = 0;i < msgSize;i++)
     {
-      QJsonObject jsonObject = msg[i].toObject();
+
 
       //对数据进行存储
-      double x = jsonObject["x"].toDouble();
-      double y = jsonObject["y"].toDouble();
+      double x = data[i].x;
+      double y = data[i].y;
       double px = x * scaleBody;
       double py = (801 - y)*scaleBody;
 
       //中靶数 中环数 -1指脱靶
-      if(jsonObject["direction"].toInt() != -1)
+      if(data[i].direction != -1)
         {
           zhongBa++;
-          sum += jsonObject["cylinder_number"].toInt();
+          sum += data[i].cylinder_number;
         }
       oneWidget[s_index]->addHoles(QPointF(px,py));
     }

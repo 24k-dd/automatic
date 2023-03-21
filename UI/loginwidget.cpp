@@ -28,12 +28,12 @@ void LoginWidget::create()
   this->setWindowTitle("用户登录");
   setAttribute(Qt::WA_DeleteOnClose,false);
 
-  this->setWindowIcon(QIcon(":/Img/user.jpg"));
+  this->setWindowIcon(QIcon(":/source/user.jpg"));
   this->setFixedSize(this->width(),this->height());
   this->setStyleSheet("background-color: white;");
 
   //加载图片
-  loginImage.load(":/Img/Login.jpg");
+  loginImage.load(":/source/Login.jpg");
   QLabel *label_logo = new QLabel(this);
   label_logo->setFixedSize(160,160);
 

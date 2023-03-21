@@ -21,9 +21,11 @@
 #include<QStringList>
 #include<QHeaderView>
 #include<QDir>
-#include<sqlitetools.h>
+
 
 #include <algorithm>
+
+#include "Model.h"
 
 class MyGradeTableWidget : public QWidget
 {
@@ -52,7 +54,7 @@ signals:
 private slots:
   void check_clicked();
 
-  void updateGrade(QJsonArray jsonArry);
+  void updateGrade(const QVector<Check_Target_Table> &data);
 
   void dateChange(const QDate &date);
 

@@ -13,6 +13,8 @@
 #include<QLabel>
 #include<QVBoxLayout>
 
+#include"Model.h"
+
 
 class TargetSheetTwo : public QLabel
 {

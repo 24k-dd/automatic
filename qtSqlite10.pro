@@ -41,12 +41,12 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 INCLUDEPATH += $$PWD
 INCLUDEPATH += $$PWD/api
-INCLUDEPATH += $$PWD/UI
-INCLUDEPATH += $$PWD/socket
+INCLUDEPATH += $$PWD/ui
+INCLUDEPATH += $$PWD/model
 
 include ($$PWD/api/api.pri)
-include ($$PWD/UI/UI.pri)
-include ($$PWD/socket/socket.pri)
+include ($$PWD/ui/ui.pri)
+include ($$PWD/model/model.pri)
 
 RESOURCES += \
     res.qrc

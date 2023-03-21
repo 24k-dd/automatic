@@ -1,17 +1,17 @@
 <RCC>
     <qresource prefix="/">
-        <file>Img/app-icon.gif</file>
-        <file>Img/app-icon.ico</file>
-        <file>Img/app-icon.jpg</file>
-        <file>Img/blue.png</file>
-        <file>Img/bulletHole.png</file>
-        <file>Img/circle-print.gif</file>
-        <file>Img/circle-print.png</file>
-        <file>Img/circle-standard.gif</file>
-        <file>Img/lastBullet.png</file>
-        <file>Img/Login.jpg</file>
-        <file>Img/login1.png</file>
-        <file>Img/sup.jpg</file>
-        <file>Img/user.jpg</file>
+        <file>source/app-icon.gif</file>
+        <file>source/app-icon.ico</file>
+        <file>source/app-icon.jpg</file>
+        <file>source/blue.png</file>
+        <file>source/bulletHole.png</file>
+        <file>source/circle-print.gif</file>
+        <file>source/circle-print.png</file>
+        <file>source/circle-standard.gif</file>
+        <file>source/lastBullet.png</file>
+        <file>source/Login.jpg</file>
+        <file>source/login1.png</file>
+        <file>source/sup.jpg</file>
+        <file>source/user.jpg</file>
     </qresource>
 </RCC>

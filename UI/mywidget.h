@@ -18,7 +18,7 @@
 #include "targetsheettwo.h"
 #include"mylistwidget.h"
 #include"mytablewidget.h"
-#include"api/Model.h"
+#include"model/Model.h"
 
 
 class MyWidget : public QWidget
@@ -46,7 +46,7 @@ public slots:
   void clearBtn();
 
   //获取数据库表1数据
-  void passHolesData(QJsonArray msg);
+  void passHolesData(const QVector<Target_Info_Table> &data);
 
   void passBatteryData(double msg);
 

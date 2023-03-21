@@ -161,10 +161,10 @@ void MyGradeTableWidget::check_clicked()
 
 }
 
-void MyGradeTableWidget::updateGrade(QJsonArray msg)
+void MyGradeTableWidget::updateGrade(const QVector<Check_Target_Table> &data)
 {
 
-  int msgSize = msg.size();
+  int msgSize = data.size();
 
 
   tableWidget->clear();
@@ -189,8 +189,7 @@ void MyGradeTableWidget::updateGrade(QJsonArray msg)
       QList<int> m_list;
       for(int i = 0;i < msgSize;i++)
         {
-          QJsonObject jsonObject = msg[i].toObject();
-          m_list.append(jsonObject["cylinder_number"].toInt());
+          m_list.append(data[i].cylinder_number);
         }
 
       baWei = new QTableWidgetItem(QString::asprintf("%d号",baHao));
@@ -201,10 +200,9 @@ void MyGradeTableWidget::updateGrade(QJsonArray msg)
       xlsx.write(2,2,QString::asprintf("%d",fenZu));
       if(msgSize > 0)
         {
-          QJsonObject s_jsonObject = msg[0].toObject();
-          name = new QTableWidgetItem(s_jsonObject["user_name"].toString());
+          name = new QTableWidgetItem(data[0].user_name);
           tableWidget->setItem(0,2,name);
-          xlsx.write(2 ,3,s_jsonObject["user_name"].toString());
+          xlsx.write(2 ,3,data[0].user_name);
         }
       int sum = 0,i;
       for(i = 0;i < m_list.size() && i < 20;i++)
@@ -226,9 +224,9 @@ void MyGradeTableWidget::updateGrade(QJsonArray msg)
 
       for(int i = 0;i < msgSize;i++)
         {
-          QJsonObject jsonObject = msg[i].toObject();
-          groupVec.append(jsonObject["group_number"].toInt());
-          nameVec.append(jsonObject["user_name"].toString());
+
+          groupVec.append(data[i].group_number);
+          nameVec.append(data[i].user_name);
         }
 
       for(int i=0;i<groupVec.size();i++){
@@ -254,11 +252,9 @@ void MyGradeTableWidget::updateGrade(QJsonArray msg)
           QList<int> m_list;
           for(int s = 0;s < msgSize;s++)
             {
-
-              QJsonObject jsonObject = msg[s].toObject();
-              if(groupVec[i] == jsonObject["group_number"].toInt())
+              if(groupVec[i] == data[s].group_number)
                 {
-                  m_list.append(jsonObject["cylinder_number"].toInt());
+                  m_list.append(data[i].cylinder_number);
                 }
 
             }
@@ -304,9 +300,8 @@ void MyGradeTableWidget::updateGrade(QJsonArray msg)
       QVector<QString> nameVec;
       for(int i = 0;i < msgSize;i++)
         {
-          QJsonObject jsonObject = msg[i].toObject();
-          numVec.append(jsonObject["addr"].toInt());
-          nameVec.append(jsonObject["user_name"].toString());
+          numVec.append(data[i].addr);
+          nameVec.append(data[i].user_name);
         }
 
       for(int i=0;i<numVec.size();i++){
@@ -332,11 +327,9 @@ void MyGradeTableWidget::updateGrade(QJsonArray msg)
           QList<int> m_list;
           for(int s = 0;s < msgSize;s++)
             {
-
-              QJsonObject jsonObject = msg[s].toObject();
-              if(numVec[i] == jsonObject["addr"].toInt())
+              if(numVec[i] == data[s].addr)
                 {
-                  m_list.append(jsonObject["cylinder_number"].toInt());
+                  m_list.append(data[s].cylinder_number);
                 }
 
             }

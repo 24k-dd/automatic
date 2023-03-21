@@ -11,7 +11,7 @@
 #include<QThread>
 #include<thread>
 
-
+#include"Model.h"
 
 class TargetSheet : public QLabel
 {
