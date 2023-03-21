@@ -17,7 +17,7 @@ MyWidget::MyWidget(int index2,QWidget *parent) : QWidget(parent,Qt::WindowStaysO
   index = index2;
 
   //在主界面中创建两个对象
-  targetSheetTwo = new TargetSheetTwo(this);
+  targetSheet = new TargetSheet(hole_size1,this);
 
   myTable = new MyTableWidget;
 
@@ -25,20 +25,12 @@ MyWidget::MyWidget(int index2,QWidget *parent) : QWidget(parent,Qt::WindowStaysO
 
   connect(clearButton,SIGNAL(clicked()),this,SLOT(clearBtn()));
 
-  connect(this,SIGNAL(mySignal(QList<QPointF>)),targetSheetTwo,SLOT(updateHoles(QList<QPointF>)));
+  connect(this,SIGNAL(mySignal(QList<QPointF>)),targetSheet,SLOT(updateHoles(QList<QPointF>)));
 }
 
 MyWidget::~MyWidget()
 {
 
-//  delete targetSheetTwo;
-//  delete myTable;
-//  delete labelSum;
-//  delete labelBaHao;
-//  delete labelName;
-//  delete clearButton;
-//  delete labelBattery;
-//  delete zhongDanShu;
 }
 
 void MyWidget::create()
@@ -145,7 +137,7 @@ void MyWidget::create()
   widget->setLayout(v_layout);
   //详细信息界面
   QHBoxLayout *h_layout = new QHBoxLayout;
-  h_layout->addWidget(targetSheetTwo);
+  h_layout->addWidget(targetSheet);
   h_layout->addItem(h_spacer);
   h_layout->addWidget(widget);
 

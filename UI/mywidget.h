@@ -15,7 +15,7 @@
 #include<QVBoxLayout>
 #include<QSpacerItem>
 
-#include "targetsheettwo.h"
+#include "targetsheet.h"
 #include"mylistwidget.h"
 #include"mytablewidget.h"
 #include"model/Model.h"
@@ -52,7 +52,7 @@ public slots:
 
 private:
 
-  TargetSheetTwo  *targetSheetTwo = NULL;
+  TargetSheet *targetSheet = NULL;
   MyTableWidget *myTable = NULL;
 
 

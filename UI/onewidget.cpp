@@ -18,7 +18,7 @@ OneWidget::OneWidget(double size,int index,QWidget *parent) :
 void OneWidget::create(double labelXY)
 {
   //目标靶
-  targetSheet = new TargetSheet(this);
+  targetSheet = new TargetSheet(hole_size2,this);
   targetSheet->setFixedSize(labelXY,labelXY);
   //垂直弹簧
   QSpacerItem *v_spacer = new QSpacerItem(10,10,QSizePolicy::Minimum,QSizePolicy::Expanding);

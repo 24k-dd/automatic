@@ -48,6 +48,12 @@ const double label_scaleBody = 0.0857;
 //靶标大小
 const int label_img = 801;
 
+//详细信息子弹大小
+const int hole_size1 = 20;
+
+//靶标列表子弹大小
+const int hole_size2 = 12;
+
 //0 1表示未连接 2表示校准中 3表示已连接 4表示电量过低
 const int flag_0 = 0,flag_1 = 1,flag_2 = 2,flag_3 = 3,flag_4 = 4;
 

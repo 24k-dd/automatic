@@ -38,7 +38,6 @@ HEADERS += \
     $$PWD/mytablewidget.h \
     $$PWD/mywidget.h \
     $$PWD/onewidget.h \
-    $$PWD/targetsheettwo.h \
    $$PWD/targetsheet.h
 
 
@@ -53,5 +52,4 @@ SOURCES += \
     $$PWD/mytablewidget.cpp \
     $$PWD/mywidget.cpp \
     $$PWD/onewidget.cpp \
-    $$PWD/targetsheettwo.cpp \
     $$PWD/targetsheet.cpp
