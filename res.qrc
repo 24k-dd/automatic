@@ -1,0 +1,17 @@
+<RCC>
+    <qresource prefix="/">
+        <file>source/app-icon.gif</file>
+        <file>source/app-icon.ico</file>
+        <file>source/app-icon.jpg</file>
+        <file>source/blue.png</file>
+        <file>source/bulletHole.png</file>
+        <file>source/circle-print.gif</file>
+        <file>source/circle-print.png</file>
+        <file>source/circle-standard.gif</file>
+        <file>source/lastBullet.png</file>
+        <file>source/Login.jpg</file>
+        <file>source/login1.png</file>
+        <file>source/sup.jpg</file>
+        <file>source/user.jpg</file>
+    </qresource>
+</RCC>
