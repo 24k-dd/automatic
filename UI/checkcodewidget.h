@@ -5,10 +5,7 @@
 
 #include<QMessageBox>
 #include<QFile>
-#include<QJsonParseError>
-#include<QJsonObject>
-#include<QJsonArray>
-#include<QJsonValue>
+
 #include<QLineEdit>
 #include<QHBoxLayout>
 #include<QSpacerItem>

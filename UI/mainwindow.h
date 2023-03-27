@@ -41,6 +41,7 @@
 #include "checkcodewidget.h"
 #include "mypeoplewidget.h"
 #include "mygradetablewidget.h"
+#include "mypeopleinfo.h"
 
 
 class MainWindow : public QWidget
@@ -58,7 +59,9 @@ public:
   //请求连接状态和电量
   void updateStateAndBattery();
 
+  void runMain();
 
+  void stopMain();
 
 private slots:
   void clearall_clicked();
@@ -81,6 +84,8 @@ private slots:
   //只允许同时打开一个界面
   void updateFlag();
 
+  void showInfo(QString data);
+
 private:
 
   MySocket *mySocket = NULL;
@@ -91,7 +96,7 @@ private:
 
   QToolButton *act[6];
 
-//  MyWidget *myWidget = NULL;
+  //  MyWidget *myWidget = NULL;
 
   //记录当前id 与上次id 用于复位
   int index2 = -1;

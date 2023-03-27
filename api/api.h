@@ -1,89 +1,96 @@
 #ifndef API_H
 #define API_H
 
-#include<QProcess>
-#include<QVariantList>
-#include<QJsonArray>
-#include<QJsonDocument>
+#include "myserver.h"
+
 #include<QByteArray>
-#include<QApplication>
-#include<QJsonObject>
-#include<QVector>
-#include<QDataStream>
 
-#include"Model.h"
-
-//转为json格式数据
-inline QByteArray structToJson(const Send_Info &sendDataInfo)
+inline QByteArray sendGroupNumberApi(int groupNumber)
 {
-
-  QJsonObject jsonObject;
-  jsonObject["code"] = sendDataInfo.code;
-  QJsonObject jo1;
-  for(auto it = sendDataInfo.msg.begin();it != sendDataInfo.msg.end();++it)
-    jo1[it.key()] = it.value();
-  jsonObject["msg"] = jo1;
-  QJsonObject jo2;
-  for(auto it = sendDataInfo.data.begin();it != sendDataInfo.data.end();++it)
-    jo2[it.key()] = it.value();
-  jsonObject["data"] = jo2;
-
-  QJsonDocument jsonDocu(jsonObject);
-  QString jsonStr = jsonDocu.toJson();
-
-  jsonStr.replace("\n","");
-  jsonStr.replace(" ","");
-  jsonStr.replace("[","");
-  jsonStr.replace("]","");
-  jsonStr.append('\n');
-
-  QByteArray sendData = jsonStr.toUtf8();
-  return sendData;
+  return sendGroupNumber(groupNumber);
 }
 
-//运行main程序
-inline void runMain()
+inline QByteArray sendYuanXinApi(int old_addr, int new_addr)
 {
-
-  QString  strm = QApplication::applicationDirPath();
-  strm += "/main.exe";
-
-  strm.replace("/","\\");
-
-  if (QProcess::startDetached(strm))
-    qDebug()  <<"main Running...";
-  else
-    qDebug()  <<"mian Running Failed";
-
+  return sendYuanXin(old_addr,new_addr);
 }
 
-//终止main程序
-inline void stopMain()
+inline QByteArray sendBeginApi(int flag)
 {
-  // 通过进程名字结束进程
-  QProcess::startDetached("taskkill -t  -f /IM " + QString("main.exe"));
-  QProcess::startDetached("taskkill -t  -f /IM " + QString("main.exe"));
-  QProcess::startDetached("taskkill -t  -f /IM " + QString("main.exe"));
+  return sendBegin(flag);
+}
+
+inline QByteArray sendOverApi(int flag)
+{
+  return sendOver(flag);
+}
+
+inline QByteArray sendSearchDataApi(int fenZu, int baHao, QString time)
+{
+  return sendSearchData(fenZu,baHao,time);
+}
+
+inline QByteArray sendHolesApi(int msg,int group_number)
+{
+  return sendHoles(msg,group_number);
+}
+
+inline QByteArray requestStateApi()
+{
+  return requestState();
+}
+
+inline QByteArray requestBatteryApi()
+{
+  return requestBattery();
+}
+
+inline QByteArray requestClearAllApi()
+{
+  return requestClearAll();
+}
+
+inline QByteArray requestClearOnlyApi(int index2)
+{
+  return requestClearOnly(index2);
+}
+
+inline QList<int> getStateApi(QList<int> vecState,const QVariantMap &map)
+{
+  return getState(vecState,map);
 }
 
 
-//字符串转json格式数据
-inline QJsonObject QstringToJson(QString jsonString)
+inline QVector<Check_Target_Table> getShowInfoApi(const QVariantMap &map)
 {
-  QJsonDocument jsonDocument = QJsonDocument::fromJson(jsonString.toLocal8Bit().data());
-  if(jsonDocument.isNull())
-    {
-      //      qDebug()<< "String NULL"<< jsonString.toLocal8Bit().data();
-    }
-  QJsonObject jsonObject = jsonDocument.object();
-  return jsonObject;
+  return getShowInfo(map);
 }
 
-//json格式转字符串
-inline QString JsonToQstring(QJsonObject jsonObject)
+
+inline QVector<Target_Info_Table> getTargetInfoApi(const QVariantMap &map)
 {
-  return QString(QJsonDocument(jsonObject).toJson());
+  return getTargetInfo(map);
 }
 
+inline QVector<double> getvecBatteryApi(const QVariantMap &map)
+{
+  return getvecBattery(map);
+}
+
+inline QByteArray openInfoApi()
+{
+  return openInfo();
+}
+
+inline QByteArray closeInfoApi()
+{
+  return closeInfo();
+}
+
+inline QByteArray bindInfoApi(int addr,QString name,QString idCard)
+{
+  return bindInfo(addr,name,idCard);
+}
 
 #endif // API_H
+

@@ -6,6 +6,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
   //注册传递信息
   qRegisterMetaType<QVector<Target_Info_Table>>("QVector<Target_Info_Table>");
+
   //运行主程序
   runMain();
 
@@ -82,8 +83,8 @@ void MainWindow::create()
 
   act[4] = new QToolButton(this);
   act[4]->setFixedWidth(170);
-  act[4]->setText("人员分组");
-  act[4]->setToolTip("对人员进行分组");
+  act[4]->setText("人员检录");
+  act[4]->setToolTip("对人员进行分组和信息录入");
 
   act[5] = new QToolButton(this);
   act[5]->setFixedWidth(170);
@@ -120,19 +121,20 @@ void MainWindow::initConnect()
   //双击打开详细界面
   connect(myListWidget,SIGNAL(mySignalDoubleIndex(int)),this,SLOT(doubleClicked(int)));
 
-  //单 双击 更新通信里的id
-  connect(myListWidget,SIGNAL(mySignalDoubleIndex(int)),mySocket,SLOT(updateIndex(int)));
-  connect(myListWidget, SIGNAL(mySignalIndex(int)), mySocket, SLOT(updateIndex(int)));
+  connect(myListWidget,SIGNAL(mySignalDoubleIndex(int)),mySocket,SLOT(updateId(int)));
+  connect(myListWidget,SIGNAL(mySignalIndex(int)),mySocket,SLOT(updateId(int)));
 
   //更新所有靶标
-  connect(mySocket,SIGNAL(mySignalUpdateHoles(const QVector<Target_Info_Table>)),myListWidget,SLOT(passHolesData(const QVector<Target_Info_Table>)));
+  connect(mySocket,SIGNAL(mySignalUpdateHoles(const QVector<Target_Info_Table>,int)),myListWidget,SLOT(passHolesData(const QVector<Target_Info_Table>,int)));
 
   //更新所有靶标电量
-  connect(mySocket,SIGNAL(mySignalBattery(QVector<double>)),myListWidget,SLOT(passBatteryData(QVector<double>)));
+  connect(mySocket,SIGNAL(mySignalBattery(const QVector<double>)),myListWidget,SLOT(passBatteryData(const QVector<double>)));
 
   //更新所有靶标状态
-  connect(mySocket,SIGNAL(mySignalState(QVector<int>)),myListWidget,SLOT(passStateData(QVector<int>)));
+  connect(mySocket,SIGNAL(mySignalState(const QList<int>)),myListWidget,SLOT(passStateData(const QList<int>)));
 
+  //录入信息提示
+  connect(mySocket,SIGNAL(mySignalInfo(QString)),this,SLOT(showInfo(QString)));
   //进行信号槽关联
   connect(act[0],SIGNAL(clicked()),this,SLOT(clearall_clicked()));
   connect(act[1],SIGNAL(clicked()),this,SLOT(clearonly_clicked()));
@@ -166,12 +168,7 @@ void MainWindow::close_clicked()
 //全部清空
 void MainWindow::clearall_clicked()
 {
-  Send_Info sendDataInfo;
-  sendDataInfo.code = ClearTarget;
-  sendDataInfo.data.insert("addr",-1);
-
-  QByteArray data = structToJson(sendDataInfo);
-
+  QByteArray data = requestClearAllApi();
   mySocket->sendData(data);
 
   qDebug()<<"全部清除指令已发送:"<<data;
@@ -186,11 +183,8 @@ void MainWindow::clearonly_clicked()
     {
       QMessageBox::information(this,tr("提示"),tr("请选中靶标!"),QMessageBox::Ok);
     }else{
-      Send_Info sendDataInfo;
-      sendDataInfo.code = ClearTarget;
-      sendDataInfo.data.insert("addr",index2);
-
-      QByteArray data = structToJson(sendDataInfo);
+      QByteArray data = requestClearOnlyApi(index2);
+      mySocket->sendData(data);
 
       qDebug()<<"主界面单个清除指令已发送:"<<data;
 
@@ -253,7 +247,16 @@ void MainWindow::people_clicked()
 
       connect(myPeopleWidget,SIGNAL(mySignalFlag()),this,SLOT(updateFlag()));
 
+      //开始录入
+      connect(myPeopleWidget,SIGNAL(openInfo()),mySocket,SLOT(openInfo()));
+      //结束录入
+      connect(myPeopleWidget,SIGNAL(closeInfo()),mySocket,SLOT(closeInfo()));
+
+      //人员信息绑定
+      connect(myPeopleWidget,SIGNAL(mySignalInfo(QString,QString)),mySocket,SLOT(bindInfo(QString,QString)));
+
       myPeopleWidget->show();
+
       m_flag = false;
     }
 }
@@ -306,7 +309,7 @@ void MainWindow::doubleClicked(int msg)
       connect(mySocket,SIGNAL(mySignalOnlyTarget(const QVector<Target_Info_Table>)),myWidget,SLOT(passHolesData(const QVector<Target_Info_Table>)));
 
       //传递单个靶的电量数据
-      connect(mySocket,SIGNAL(mySignalBatteryValue(double)),myWidget,SLOT(passBatteryData(double)));
+      connect(mySocket,SIGNAL(mySignalBattery(const QVector<double>)),myWidget,SLOT(passBatteryData(const QVector<double>)));
 
       myWidget->show();
 
@@ -317,17 +320,11 @@ void MainWindow::doubleClicked(int msg)
 //请求连接状态和电量
 void MainWindow::updateStateAndBattery()
 {
-  Send_Info sendDataInfo;
-  sendDataInfo.code = GetTargetState;
 
-  QByteArray dataState = structToJson(sendDataInfo);
 
-  mySocket->sendData(dataState);
+  mySocket->sendData(requestStateApi());
 
-  sendDataInfo.code = GetVoltage;
-  QByteArray dataBattery  = structToJson(sendDataInfo);
-
-  mySocket->sendData(dataBattery );
+  mySocket->sendData(requestBatteryApi() );
 }
 
 
@@ -336,6 +333,43 @@ void MainWindow::updateFlag()
 {
   m_flag = true;
 }
+
+void MainWindow::showInfo(QString msg)
+{
+  if(msg == "yes")
+    {
+      QMessageBox::information(this,tr("提示"),tr("读取成功!"),QMessageBox::Ok);
+    }else if(msg == "no"){
+      QMessageBox::warning(this,tr("警告"),tr("读取失败!"),QMessageBox::Ok);
+    }
+}
+
+
+//运行main程序
+void MainWindow::runMain()
+{
+
+  QString  strm = QApplication::applicationDirPath();
+  strm += "/main.exe";
+
+  strm.replace("/","\\");
+
+  if (QProcess::startDetached(strm))
+    qDebug()  <<"main Running...";
+  else
+    qDebug()  <<"mian Running Failed";
+
+}
+
+//终止main程序
+void MainWindow::stopMain()
+{
+  // 通过进程名字结束进程
+  QProcess::startDetached("taskkill -t  -f /IM " + QString("main.exe"));
+  QProcess::startDetached("taskkill -t  -f /IM " + QString("main.exe"));
+  QProcess::startDetached("taskkill -t  -f /IM " + QString("main.exe"));
+}
+
 
 
 

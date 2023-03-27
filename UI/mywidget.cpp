@@ -157,14 +157,13 @@ void MyWidget::passHolesData(const QVector<Target_Info_Table> &data)
 {
   int sum = 0,zhongBa = 0;
   int msgSize = data.size();
+
   QList<QPointF>   onlyHoleList = {};
 
   myTable->clearContents();
+
   for(int i = 0;i < msgSize;i++)
     {
-
-      s_index = data[i].addr;
-
       user_name = data[i].user_name;
       labelName->setText(user_name);
 
@@ -199,41 +198,25 @@ void MyWidget::passHolesData(const QVector<Target_Info_Table> &data)
       myTable->setItem(i,2,direction);
     }
 
+
   zhongDanShu->setText(QString::asprintf("%d",zhongBa));
 
   labelSum->setText(QString::asprintf("%d",sum));
 
   emit mySignal(onlyHoleList);
 
-
 }
 
-void MyWidget::passBatteryData(double msg)
+void MyWidget::passBatteryData(const QVector<double> &msg)
 {
 
-  labelBattery->setText(QString::asprintf("%.1f V",msg));
+  labelBattery->setText(QString::asprintf("%.1f V",msg[index]));
 }
 
 //获取当前点击的item
 void MyWidget::getIndex(int msg)
 {
   index = msg + 1;
-  QList<QPointF>   onlyHoleList = {};
-
-  //清空表格
-  if(index != s_index)
-    {
-      myTable->clear();
-      labelName->setText("");
-      zhongDanShu->setText("");
-      labelSum->setText("");
-      labelBattery->setText("");
-      emit mySignal(onlyHoleList);
-    }
-  QStringList strList;
-  strList<<tr("弹序")<<tr("环数")<<tr("方向");
-  myTable->setHorizontalHeaderLabels(strList);
-
 
   //更新当前靶号
   labelBaHao->setText(QString::asprintf("%d",index));
@@ -242,19 +225,6 @@ void MyWidget::getIndex(int msg)
 void MyWidget::clearBtn()
 {
   emit mySignalBtn();
-
-  QList<QPointF>   onlyHoleList = {};
-
-  myTable->clear();
-  labelName->setText("");
-  zhongDanShu->setText("");
-  labelSum->setText("");
-  labelBattery->setText("");
-  emit mySignal(onlyHoleList);
-
-  QStringList strList;
-  strList<<tr("弹序")<<tr("环数")<<tr("方向");
-  myTable->setHorizontalHeaderLabels(strList);
 }
 
 

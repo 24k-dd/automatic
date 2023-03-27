@@ -49,8 +49,10 @@ int main(int argc, char *argv[])
   QApplication a(argc, argv);
   QResource::registerResource("./plane.rcc");
   LoginWidget w;
+  //  MyPeopleWidget w;
+  //  MyPeopleInfo w;
   w.show();
   // 先注册自己的MsgHandler
-//  qInstallMessageHandler(outputMessage);
+  //  qInstallMessageHandler(outputMessage);
   return a.exec();
 }

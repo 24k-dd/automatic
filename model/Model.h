@@ -3,6 +3,8 @@
 
 #include<QString>
 #include <QMetaType>
+#include <QDate>
+
 
 // 控制命令接口路由值 10000-19999
 // RewriteTargetId 重写地址
@@ -19,6 +21,9 @@ const int OpenInfoEntry = 10004;
 const int CloseInfoEntry = 10005;
 // UserGrouping 配置分组
 const int UserGrouping = 10006;
+
+//绑定人员信息
+const int    BindInfo = 10007;
 
 // 获取信息接口路由值 20000-29999
 // GetTargetInfo 获取
@@ -39,6 +44,9 @@ const int holes_time = 1000;
 //画布刷新间隔
 const int paint_time = 300;
 
+//读卡时间间隔
+//const int info_entry = 300;
+
 //靶标数目
 const int array_size = 21;
 
@@ -54,8 +62,8 @@ const int hole_size1 = 20;
 //靶标列表子弹大小
 const int hole_size2 = 12;
 
-//0 1表示未连接 2表示校准中 3表示已连接 4表示电量过低
-const int flag_0 = 0,flag_1 = 1,flag_2 = 2,flag_3 = 3,flag_4 = 4;
+//1表示未连接 2表示毁坏 3表示已连接 4表示校准中 5是就绪
+const int flag_1 = 1,flag_2 = 2,flag_3 = 3,flag_4 = 4,flag_5 = 5;
 
 typedef struct Target_Info_Table
 {
@@ -77,6 +85,7 @@ typedef struct Check_Target_Table
 
 }checkInfoTable;
 Q_DECLARE_METATYPE(Check_Target_Table)
+//这个宏是为了让QMetaType知道Type这个数据类型，并提供一个默认的拷贝构造函数和析构函数。QVariant需要使用Q_DECLARE_METATYPE这个宏来定制类型。
 
 //发送信息格式
 typedef struct Send_Info{

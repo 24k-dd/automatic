@@ -108,21 +108,19 @@ void MyListWidget::wheelEvent(QWheelEvent *event)
 }
 
 //传递子弹数据
-void MyListWidget::passHolesData(const QVector<Target_Info_Table> &data)
+void MyListWidget::passHolesData(const QVector<Target_Info_Table> &data,int addr)
 {
   //总环数 中靶数
   int sum = 0,zhongBa = 0;
   //确定数组大小
   int msgSize = data.size();
-  if(msgSize > 0)
-    {
-      s_index = data[0].addr - 1;
-    }
+
+  s_index = addr - 1;
+
   oneWidget[s_index]->clearHoles();
+
   for(int i = 0;i < msgSize;i++)
     {
-
-
       //对数据进行存储
       double x = data[i].x;
       double y = data[i].y;
@@ -144,15 +142,22 @@ void MyListWidget::passHolesData(const QVector<Target_Info_Table> &data)
   //触发信号
   oneWidget[s_index]->getMySignal();
 
+  if(currentWidth < 300)
+    {
+      oneWidget[s_index]->labelSum->setStyleSheet("QLabel{font-size: 15px;background-color: #cdcdcd}");
+    }else{
+      oneWidget[s_index]->labelSum->setStyleSheet("QLabel{font-size: 23px;background-color: #cdcdcd}");
+    }
+
 }
 
 
-void MyListWidget::passStateData(QVector<int> vecState)
+void MyListWidget::passStateData(const QList<int> &vecState)
 {
   for(int i = 1;i < array_size;i++)
     {
       int s_index = i - 1;
-      if(vecState[i] == flag_0 || vecState[i] == flag_1)
+      if(vecState[i] == flag_1)
         {
           oneWidget[s_index]->labelState->setText(QString::asprintf("未连接"));
 
@@ -162,7 +167,7 @@ void MyListWidget::passStateData(QVector<int> vecState)
             }else{
               oneWidget[s_index]->labelState->setStyleSheet("QLabel{font-size: 23px;background-color: #cdcdcd}");
             }
-        }else if(vecState[i] == flag_2)
+        }else if(vecState[i] == flag_4)
         {
           oneWidget[s_index]->labelState->setText(QString::asprintf("校准中"));
 
@@ -172,7 +177,7 @@ void MyListWidget::passStateData(QVector<int> vecState)
             }else{
               oneWidget[s_index]->labelState->setStyleSheet("QLabel{font-size: 23px;background-color: #89fff2}");
             }
-        }else{
+        }else if(vecState[i] == flag_3 || vecState[i] == flag_5){
           oneWidget[s_index]->labelState->setText(QString::asprintf("已连接"));
           //设置字体大小
           if(currentWidth < 300)
@@ -186,7 +191,7 @@ void MyListWidget::passStateData(QVector<int> vecState)
 }
 
  //传递电量数据
-void MyListWidget::passBatteryData(QVector<double> msg)
+void MyListWidget::passBatteryData(const QVector<double> &msg)
 {
   for(int i = 1;i < msg.size();i++)
     {
@@ -230,6 +235,7 @@ void MyListWidget::listWidgeSelectionChanged(QListWidgetItem* ite)
     }
   emit mySignalIndex(index2);
 }
+
 
 
 

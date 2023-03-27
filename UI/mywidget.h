@@ -48,7 +48,7 @@ public slots:
   //获取数据库表1数据
   void passHolesData(const QVector<Target_Info_Table> &data);
 
-  void passBatteryData(double msg);
+  void passBatteryData(const QVector<double> &msg);
 
 private:
 
@@ -74,6 +74,8 @@ private:
   int index = 4,s_index = 0;
 
   QString user_name = "";
+
+  int addr = 0;
 
 };
 

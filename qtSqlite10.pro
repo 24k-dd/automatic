@@ -30,8 +30,6 @@ SOURCES += \
     main.cpp
 
 
-
-
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
@@ -43,10 +41,16 @@ INCLUDEPATH += $$PWD
 INCLUDEPATH += $$PWD/api
 INCLUDEPATH += $$PWD/ui
 INCLUDEPATH += $$PWD/model
+INCLUDEPATH += $$PWD/pkg
+INCLUDEPATH += $$PWD/bll
 
 include ($$PWD/api/api.pri)
 include ($$PWD/ui/ui.pri)
 include ($$PWD/model/model.pri)
+include ($$PWD/pkg/pkg.pri)
+include ($$PWD/bll/bll.pri)
 
 RESOURCES += \
     res.qrc
+
+

@@ -32,20 +32,23 @@ signals:
   mySignalDoubleIndex(int msg);
   mySignalIndex(int msg);
 
+//  mySignalHoles(const QVector<Target_Info_Table> &data);
+
 public slots:
   //传递子弹数据
-  void passHolesData(const QVector<Target_Info_Table> &data);
+  void passHolesData(const QVector<Target_Info_Table> &data,int addr);
 
   //传递电量数据
-  void passBatteryData(QVector<double> msg);
+  void passBatteryData(const QVector<double> &msg);
 
-  void passStateData(QVector<int> vecState);
+  void passStateData(const QList<int> &vecState);
 
   //显示详细信息
   void listWidgetDoubleClicked(QListWidgetItem *item);
 
   //添加选中阴影
   void listWidgeSelectionChanged(QListWidgetItem* item);
+
 
 private:
   double screenWidth;
@@ -65,6 +68,8 @@ private:
   int index2 = -2;
 
   int index3 = -3;
+
+  int addr = 0;
 
 
 };
